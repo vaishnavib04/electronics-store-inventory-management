@@ -2,144 +2,134 @@
 
 ## Overview
 
-The Electronics Store Inventory Management System (ESIMS) is a web-based application designed to help manage an electronics store's products, inventory, suppliers, purchases, sales, and reports.
+The Electronics Store Inventory Management System (ESIMS) is a web-based application designed to manage the products, inventory, suppliers, purchases, and sales of an electronics store. It aims to simplify stock tracking, maintain accurate inventory records, and support efficient store operations.
 
-The system aims to maintain accurate stock records, prevent invalid inventory updates, identify low-stock products, and provide useful inventory and sales information.
+## Tech Stack
 
-## Technology Stack
-
-- **Backend:** Python and Flask
-- **Frontend:** HTML, CSS, Bootstrap, and Jinja templates
+- **Backend:** Python, Flask
 - **Database:** MySQL
-- **Database access:** SQLAlchemy ORM
-- **Authentication:** Flask sessions and password hashing
+- **ORM:** Flask-SQLAlchemy
+- **Database Driver:** PyMySQL
+- **Frontend:** HTML, CSS, JavaScript
 - **Testing:** pytest
-- **Version control and collaboration:** Git and GitHub
-- **Project tracking:** GitHub Projects and GitHub Issues
-- **Automation:** GitHub Actions
+- **Version Control:** Git and GitHub
+- **Continuous Integration:** GitHub Actions
 
 ## Planned Features
 
-- User login and logout
-- Product creation, viewing, updating, and searching
-- Unique SKU validation
-- Stock quantity tracking and low-stock alerts
-- Prevention of negative inventory
+- User authentication and role-based access control
+- Product and category management
 - Supplier management
-- Purchase recording and stock updates
-- Sales recording and stock updates
-- Inventory reports
-- Date-range sales reports
+- Inventory tracking and stock updates
+- Purchase and sales transaction management
+- Stock movement history
+- Inventory and sales reports
+- Automated testing and continuous integration
 
-## Project Structure
+## Repository Structure
 
 ```text
 electronics-store-inventory-management/
-│
+├── SRS/
+├── Software_Architecture_and_Design_Specification/
+├── Software_Test_Plan/
 ├── app/
+│   ├── auth/
+│   ├── products/
+│   ├── inventory/
+│   ├── suppliers/
+│   ├── purchases/
+│   ├── sales/
+│   ├── reports/
+│   ├── templates/
+│   ├── static/
+│   │   ├── css/
+│   │   └── js/
 │   ├── __init__.py
 │   ├── extensions.py
-│   ├── models.py
-│   │
-│   ├── auth/
-│   │   └── routes.py
-│   ├── products/
-│   │   └── routes.py
-│   ├── inventory/
-│   │   └── routes.py
-│   ├── suppliers/
-│   │   └── routes.py
-│   ├── purchases/
-│   │   └── routes.py
-│   ├── sales/
-│   │   └── routes.py
-│   ├── reports/
-│   │   └── routes.py
-│   │
-│   ├── templates/
-│   │   ├── base.html
-│   │   ├── auth/
-│   │   ├── products/
-│   │   ├── inventory/
-│   │   ├── suppliers/
-│   │   ├── purchases/
-│   │   ├── sales/
-│   │   └── reports/
-│   │
-│   └── static/
-│       ├── css/
-│       └── js/
-│
+│   └── models.py
 ├── tests/
-├── config.py
-├── requirements.txt
-├── .env.example
+├── .github/
+│   └── workflows/
+├── .env                  # Local configuration; not committed
 ├── .gitignore
+├── requirements.txt
 ├── run.py
 └── README.md
 ```
 
-Files and folders will be added as the corresponding features are implemented.
+The application folders and files are being developed incrementally.
 
 ## Prerequisites
 
-- Python 3
-- MySQL Server
-- Git
-- A code editor such as Visual Studio Code
+- Python installed
+- MySQL Server installed and running
+- Git installed
+- Visual Studio Code or another code editor
 
-## Setup and Installation
+## Setup Instructions
 
-1. Clone the repository:
+### 1. Clone the repository
 
-   ```bash
-   git clone <repository-url>
-   cd ESIMS
-   ```
+```powershell
+git clone https://github.com/vaishnavib04/electronics-store-inventory-management.git
+cd electronics-store-inventory-management
+```
 
-2. Create and activate a Python virtual environment:
+### 2. Create and activate a virtual environment
 
-   **Windows:**
+```powershell
+py -m venv .venv
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\.venv\Scripts\Activate.ps1
+```
 
-   ```bash
-   python -m venv .venv
-   .venv\Scripts\activate
-   ```
+### 3. Install dependencies
 
-3. Install the project dependencies:
+```powershell
+py -m pip install -r requirements.txt
+```
 
-   ```bash
-   pip install -r requirements.txt
-   ```
+### 4. Configure the database
 
-4. Create the MySQL database using the database name and configuration documented by the project.
+Create a MySQL database named `esims_db`, or use the database name agreed upon by the team.
 
-5. Configure the required environment variables using `.env.example` as a reference. Do not commit actual credentials.
+Create a `.env` file in the project root:
 
-6. Start the application using the run instructions implemented in `app.py`.
+```env
+SECRET_KEY=replace-with-a-random-secret
+DATABASE_URL=mysql+pymysql://root:YOUR_PASSWORD@localhost/esims_db
+```
 
-## Running Tests
+Replace `YOUR_PASSWORD` with your MySQL password. URL-encode special characters in the password when required.
 
-Run the automated tests from the project root:
+**Security:** Never commit `.env` or expose database credentials in the repository.
 
-```bash
-pytest
+### 5. Run the application
+
+Ensure the database configuration is correct, then run:
+
+```powershell
+py run.py
+```
+
+Open `http://127.0.0.1:5000` in your browser.
+
+### 6. Run tests
+
+```powershell
+py -m pytest -v
 ```
 
 ## Development Workflow
 
-1. Select an issue from the GitHub Project board.
-2. Create a feature branch.
-3. Implement the feature and add relevant tests.
-4. Commit and push your changes.
-5. Open a pull request linked to the relevant issue.
-6. Request a review and ensure required GitHub Actions checks pass.
-7. Merge the approved pull request into the main branch.
-
-## Project Scope
-
-ESIMS focuses on internal electronics-store inventory operations. Online shopping, online payments, delivery management, and advanced accounting are outside the planned scope.
+1. Pull the latest changes from the shared repository.
+2. Work on an assigned GitHub issue.
+3. Create a separate branch for the task.
+4. Implement the changes and run relevant tests.
+5. Push the branch and open a pull request.
+6. Review and merge changes after the required checks pass.
 
 ## Project Status
 
-The project is in the setup and planning stage. Features will be implemented incrementally across the planned sprints.
+The repository contains the initial project documentation and structure. The Flask application has been initialized, the MySQL connection has been configured, and the initial database connection test passes. Feature implementation, additional testing, and automated CI checks are planned as part of ongoing development.
