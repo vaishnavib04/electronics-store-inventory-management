@@ -1,4 +1,7 @@
 
+import os
+
+import pytest
 from sqlalchemy import text
 from sqlalchemy.exc import OperationalError
 
@@ -6,6 +9,10 @@ from app import create_app
 from app.extensions import db
 
 
+@pytest.mark.skipif(
+    not os.getenv("DATABASE_URL", "").startswith("mysql"),
+    reason="MySQL constraint test requires a MySQL DATABASE_URL",
+)
 def test_mysql_rejects_negative_product_price():
     app = create_app()
 
@@ -41,7 +48,6 @@ def test_mysql_rejects_negative_product_price():
 
         except OperationalError as exc:
             assert "ck_product_unit_price" in str(exc)
-            print("MySQL correctly rejected the negative product price.")
             return
 
         raise AssertionError("MySQL accepted a negative product price.")
