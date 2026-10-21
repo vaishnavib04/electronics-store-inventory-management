@@ -21,5 +21,9 @@ def create_app():
     db.init_app(app)
 
     from app import models  # noqa: F401
+    from app.auth import auth_bp
+    from app.auth import routes  # noqa: F401
+
+    app.register_blueprint(auth_bp)
 
     return app
