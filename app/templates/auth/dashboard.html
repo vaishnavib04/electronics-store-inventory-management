@@ -1,0 +1,15 @@
+
+{% extends "base.html" %}
+
+{% block title %}Dashboard | ESIMS{% endblock %}
+
+{% block content %}
+<h2>Welcome to ESIMS, {{ current_user.username }}!</h2>
+
+<p>Role: {{ current_user.role }}</p>
+
+<form method="POST" action="{{ url_for('auth.logout') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button type="submit">Logout</button>
+</form>
+{% endblock %}
