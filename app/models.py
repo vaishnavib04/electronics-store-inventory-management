@@ -1,4 +1,4 @@
-
+from flask_login import UserMixin
 from datetime import datetime
 from decimal import Decimal
 
@@ -6,7 +6,7 @@ from sqlalchemy import CheckConstraint, UniqueConstraint
 from app.extensions import db
 
 
-class User(db.Model):
+class User(UserMixin, db.Model):
     __tablename__ = "users"
 
     user_id = db.Column(db.Integer, primary_key=True)
@@ -14,6 +14,9 @@ class User(db.Model):
     password_hash = db.Column(db.String(255), nullable=False)
     role = db.Column(db.String(30), nullable=False, default="Store Staff")
     is_active = db.Column(db.Boolean, nullable=False, default=True)
+
+    def get_id(self):
+        return str(self.user_id)
 
     purchases = db.relationship("Purchase", back_populates="user")
     sales = db.relationship("Sale", back_populates="user")
