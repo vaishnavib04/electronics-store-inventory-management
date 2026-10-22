@@ -90,6 +90,12 @@ class Supplier(db.Model):
     email = db.Column(db.String(150))
     address = db.Column(db.Text)
 
+    is_active = db.Column(
+        db.Boolean,
+        nullable=False,
+        default=True
+    )
+
     purchases = db.relationship("Purchase", back_populates="supplier")
 
 
