@@ -65,3 +65,8 @@ def test_database_check_constraints():
             isinstance(constraint, CheckConstraint)
             for constraint in model.__table__.constraints
         ), f"{model.__name__} is missing check constraints"
+def test_supplier_is_active_by_default():
+    column = Supplier.__table__.columns["is_active"]
+
+    assert column.nullable is False
+    assert column.default.arg is True
