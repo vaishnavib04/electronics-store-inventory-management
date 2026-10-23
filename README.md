@@ -17,14 +17,25 @@ The Electronics Store Inventory Management System (ESIMS) is a web-based applica
 
 ## Planned Features
 
-- User authentication and role-based access control
-- Product and category management
-- Supplier management
-- Inventory tracking and stock updates
+- Role-based access control
+- Product and category management screens
 - Purchase and sales transaction management
 - Stock movement history
 - Inventory and sales reports
-- Automated testing and continuous integration
+
+## Sprint 1 Demonstration
+
+The Sprint 1 working product demonstration is available here:
+
+[Watch the Sprint 1 demonstration](./sprint_videos/sprint1_demo.mp4)
+
+Sprint 1 currently includes:
+
+- User login, logout, and protected dashboard
+- Inventory listing and search by product name or SKU
+- Low-stock reporting
+- Supplier listing, creation, and editing
+- Database models, validation, and automated tests
 
 ## Repository Structure
 
@@ -49,6 +60,8 @@ electronics-store-inventory-management/
 │   ├── extensions.py
 │   └── models.py
 ├── tests/
+├── sprint_videos/
+│   └── sprint1_demo.mp4
 ├── .github/
 │   └── workflows/
 ├── .env                  # Local configuration; not committed
@@ -132,4 +145,4 @@ py -m pytest -v
 
 ## Project Status
 
-The repository contains the initial project documentation and structure. The Flask application has been initialized, the MySQL connection has been configured, and the initial database connection test passes. Feature implementation, additional testing, and automated CI checks are planned as part of ongoing development.
+Sprint 1 is complete with working authentication, inventory, low-stock reporting, supplier management, database models, automated tests, and continuous integration. Additional product, purchase, sales, reporting, and role-based access-control features are planned for future sprints.
