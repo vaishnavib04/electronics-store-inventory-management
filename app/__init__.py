@@ -37,8 +37,10 @@ def create_app():
     from app.auth import auth_bp
     from app.auth import routes  # noqa: F401
     from app.suppliers import suppliers_bp
+    from app.inventory.routes import inventory_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(suppliers_bp)
+    app.register_blueprint(inventory_bp)
 
     return app
