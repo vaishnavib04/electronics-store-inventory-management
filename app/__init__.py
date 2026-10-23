@@ -17,10 +17,14 @@ def create_app():
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
     if not app.config["SECRET_KEY"]:
-        raise RuntimeError("SECRET_KEY is missing. Configure it in your .env file.")
+        raise RuntimeError(
+            "SECRET_KEY is missing. Configure it in your .env file."
+        )
 
     if not app.config["SQLALCHEMY_DATABASE_URI"]:
-        raise RuntimeError("DATABASE_URL is missing. Configure it in your .env file.")
+        raise RuntimeError(
+            "DATABASE_URL is missing. Configure it in your .env file."
+        )
 
     db.init_app(app)
     login_manager.init_app(app)
@@ -32,7 +36,9 @@ def create_app():
     from app import models  # noqa: F401
     from app.auth import auth_bp
     from app.auth import routes  # noqa: F401
+    from app.suppliers import suppliers_bp
 
     app.register_blueprint(auth_bp)
+    app.register_blueprint(suppliers_bp)
 
     return app
