@@ -1,0 +1,57 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supplier Management</title>
+</head>
+<body>
+    <h1>Supplier Management</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <p class="{{ category }}">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <p>
+        <a href="{{ url_for('suppliers.add_supplier') }}">Add Supplier</a>
+    </p>
+
+    {% if suppliers %}
+        <table border="1" cellpadding="8">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Contact Person</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                    <th>Address</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for supplier in suppliers %}
+                    <tr>
+                        <td>{{ supplier.supplier_id }}</td>
+                        <td>{{ supplier.name }}</td>
+                        <td>{{ supplier.contact_person or "-" }}</td>
+                        <td>{{ supplier.phone or "-" }}</td>
+                        <td>{{ supplier.email or "-" }}</td>
+                        <td>{{ supplier.address or "-" }}</td>
+                        <td>
+                            <a href="{{ url_for('suppliers.edit_supplier', supplier_id=supplier.supplier_id) }}">Edit</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No suppliers found.</p>
+    {% endif %}
+</body>
+</html>
