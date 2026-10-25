@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}{{ product.name }} | ESIMS{% endblock %}
+{% block content %}
+<h2>{{ product.name }}</h2>
+<dl>
+  <dt>SKU</dt><dd>{{ product.sku }}</dd>
+  <dt>Category</dt><dd>{{ product.category.name }}</dd>
+  <dt>Unit price</dt><dd>{{ "%.2f"|format(product.unit_price) }}</dd>
+  <dt>Reorder level</dt><dd>{{ product.reorder_level }}</dd>
+</dl>
+<p><a href="{{ url_for('products.edit_product', product_id=product.product_id) }}">Edit product</a></p>
+<p><a href="{{ url_for('products.list_products') }}">Back to products</a></p>
+{% endblock %}
