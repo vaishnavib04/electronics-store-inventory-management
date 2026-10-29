@@ -257,7 +257,35 @@ def test_sales_report_rejects_bad_dates(logged_in, sales, query, message):
     resp = logged_in.get(f"/reports/sales?{query}")
     assert resp.status_code == 400
     assert message in resp.data
-    assert b"101750.00" in resp.data  # falls back to all sales
+    assert b"Please correct the dates above" in resp.data
+    # No figures are shown, so unfiltered totals can't be mistaken for the range.
+    assert b"101750.00" not in resp.data
+    assert b"Number of sales" not in resp.data
+    assert b"All completed sales." not in resp.data
+
+
+def test_sales_report_keeps_entered_dates_after_error(logged_in, sales):
+    resp = logged_in.get("/reports/sales?start=2026-10-20&end=2026-10-01")
+    assert b'value="2026-10-20"' in resp.data
+    assert b'value="2026-10-01"' in resp.data
+
+
+@pytest.mark.parametrize("role", ["Store Staff", "Administrator"])
+def test_both_roles_can_view_reports(app, client, sales, role):
+    """SRS F-015 and F-016 list Store Staff as the stakeholder, and the
+    Store Manager/Administrator has access to all functions (SRS 2.3)."""
+    user = User(username=f"report_{role.replace(' ', '_')}",
+                password_hash=generate_password_hash("x"), role=role, is_active=True)
+    db.session.add(user)
+    db.session.commit()
+    with client.session_transaction() as sess:
+        sess["_user_id"] = str(user.user_id)
+        sess["_fresh"] = True
+
+    inv = client.get("/reports/inventory")
+    sal = client.get("/reports/sales?start=2026-10-01&end=2026-10-31")
+    assert inv.status_code == 200 and b"Laptop" in inv.data
+    assert sal.status_code == 200 and b"101750.00" in sal.data
 
 
 def test_sales_report_with_no_sales(logged_in):

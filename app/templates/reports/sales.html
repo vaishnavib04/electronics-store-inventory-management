@@ -16,6 +16,9 @@
   {% if raw_start or raw_end %}<a href="{{ url_for('reports.sales_report') }}">Clear</a>{% endif %}
 </form>
 
+{% if not show_results %}
+<p>Please correct the dates above to see the report.</p>
+{% else %}
 <p>
   {% if start and end %}Completed sales from {{ start.strftime('%d %b %Y') }} to {{ end.strftime('%d %b %Y') }}.
   {% elif start %}Completed sales from {{ start.strftime('%d %b %Y') }} onwards.
@@ -86,6 +89,7 @@
 </table>
 {% else %}
 <p>No sales found for this period.</p>
+{% endif %}
 {% endif %}
 
 <p>
