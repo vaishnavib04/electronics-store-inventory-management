@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Sales | ESIMS{% endblock %}
+{% block content %}
+<h2>Sales</h2>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for category, message in messages %}
+    <p class="flash {{ category }}" role="alert">{{ message }}</p>
+  {% endfor %}
+{% endwith %}
+
+<p><a href="{{ url_for('sales.create_sale') }}">Record a new sale</a></p>
+
+{% if sales %}
+<table border="1" cellpadding="6" cellspacing="0">
+  <thead>
+    <tr>
+      <th>Sale #</th>
+      <th>Date and time</th>
+      <th>Recorded by</th>
+      <th>Items</th>
+      <th>Total</th>
+      <th>Status</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for sale in sales %}
+    <tr>
+      <td>{{ sale.sale_id }}</td>
+      <td>{{ sale.sale_datetime.strftime('%d %b %Y %H:%M') }}</td>
+      <td>{{ sale.user.username }}</td>
+      <td>{{ sale.items | sum(attribute='quantity') }}</td>
+      <td>{{ "%.2f"|format(sale.total_amount) }}</td>
+      <td>{{ sale.status }}</td>
+      <td><a href="{{ url_for('sales.view_sale', sale_id=sale.sale_id) }}">View</a></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>No sales have been recorded yet.</p>
+{% endif %}
+{% endblock %}

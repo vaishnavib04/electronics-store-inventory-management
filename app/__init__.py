@@ -42,12 +42,15 @@ def create_app():
     from app.inventory.routes import inventory_bp
     from app.purchases import purchases_bp
     from app.purchases import routes as purchase_routes  # noqa: F401
+    from app.sales import sales_bp
+    from app.sales import routes as sales_routes  # noqa: F401
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(products_bp)
     app.register_blueprint(suppliers_bp)
     app.register_blueprint(inventory_bp)
     app.register_blueprint(purchases_bp, url_prefix="/purchases")
+    app.register_blueprint(sales_bp)
 
     return app
 

@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Record Sale | ESIMS{% endblock %}
+{% block content %}
+<h2>Record a sale</h2>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for category, message in messages %}
+    <p class="flash {{ category }}" role="alert">{{ message }}</p>
+  {% endfor %}
+{% endwith %}
+
+{% if not products %}
+<p>There are no active products to sell yet.</p>
+{% else %}
+<p>Prices and the total are calculated by the system from the current product prices.</p>
+
+<form method="POST" action="{{ url_for('sales.create_sale') }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+  <div id="sale-items">
+    {% for row in rows %}
+    <div class="sale-item">
+      <label>Product:
+        <select name="product_id">
+          <option value="">Select product</option>
+          {% for product in products %}
+          <option value="{{ product.product_id }}"
+            {% if row.product_id|string == product.product_id|string %}selected{% endif %}>
+            {{ product.name }} ({{ product.sku }}): {{ "%.2f"|format(product.unit_price) }}, {{ product.available }} in stock
+          </option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>Quantity:
+        <input type="number" name="quantity" min="1" step="1" value="{{ row.quantity }}">
+      </label>
+    </div>
+    {% endfor %}
+  </div>
+
+  <p>
+    <button type="button" id="add-item">Add another product</button>
+    <button type="submit">Record sale</button>
+  </p>
+</form>
+{% endif %}
+
+<p><a href="{{ url_for('sales.list_sales') }}">Back to sales</a></p>
+
+<script>
+  (function () {
+    var button = document.getElementById("add-item");
+    if (!button) { return; }
+    button.addEventListener("click", function () {
+      var container = document.getElementById("sale-items");
+      var newItem = container.querySelector(".sale-item").cloneNode(true);
+      newItem.querySelectorAll("select, input").forEach(function (field) {
+        field.value = "";
+      });
+      container.appendChild(newItem);
+    });
+  })();
+</script>
+{% endblock %}
