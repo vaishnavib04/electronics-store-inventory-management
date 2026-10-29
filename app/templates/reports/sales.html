@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Sales Report | ESIMS{% endblock %}
+{% block content %}
+<h2>Sales report</h2>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for category, message in messages %}
+    <p class="flash {{ category }}" role="alert">{{ message }}</p>
+  {% endfor %}
+{% endwith %}
+
+<form method="get" action="{{ url_for('reports.sales_report') }}">
+  <label>From: <input type="date" name="start" value="{{ raw_start }}"></label>
+  <label>To: <input type="date" name="end" value="{{ raw_end }}"></label>
+  <button type="submit">Show</button>
+  {% if raw_start or raw_end %}<a href="{{ url_for('reports.sales_report') }}">Clear</a>{% endif %}
+</form>
+
+{% if not show_results %}
+<p>Please correct the dates above to see the report.</p>
+{% else %}
+<p>
+  {% if start and end %}Completed sales from {{ start.strftime('%d %b %Y') }} to {{ end.strftime('%d %b %Y') }}.
+  {% elif start %}Completed sales from {{ start.strftime('%d %b %Y') }} onwards.
+  {% elif end %}Completed sales up to {{ end.strftime('%d %b %Y') }}.
+  {% else %}All completed sales.{% endif %}
+</p>
+
+<table border="1" cellpadding="6" cellspacing="0">
+  <tbody>
+    <tr><th>Number of sales</th><td>{{ summary.sale_count }}</td></tr>
+    <tr><th>Units sold</th><td>{{ summary.total_units }}</td></tr>
+    <tr><th>Total revenue</th><td>{{ "%.2f"|format(summary.total_revenue) }}</td></tr>
+    <tr><th>Average sale value</th><td>{{ "%.2f"|format(summary.average_sale) }}</td></tr>
+  </tbody>
+</table>
+
+{% if summary.sale_count %}
+<h3>Sales in this period</h3>
+<table border="1" cellpadding="6" cellspacing="0">
+  <thead>
+    <tr><th>Sale #</th><th>Date and time</th><th>Recorded by</th><th>Units</th><th>Total</th></tr>
+  </thead>
+  <tbody>
+    {% for row in sale_rows %}
+    <tr>
+      <td>{{ row.sale_id }}</td>
+      <td>{{ row.sale_datetime.strftime('%d %b %Y %H:%M') }}</td>
+      <td>{{ row.username }}</td>
+      <td>{{ row.units }}</td>
+      <td>{{ "%.2f"|format(row.total_amount) }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<h3>Sales by product</h3>
+<table border="1" cellpadding="6" cellspacing="0">
+  <thead>
+    <tr><th>SKU</th><th>Product</th><th>Units sold</th><th>Revenue</th></tr>
+  </thead>
+  <tbody>
+    {% for row in products %}
+    <tr>
+      <td>{{ row.sku }}</td>
+      <td>{{ row.name }}</td>
+      <td>{{ row.units }}</td>
+      <td>{{ "%.2f"|format(row.revenue) }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<h3>Sales by day</h3>
+<table border="1" cellpadding="6" cellspacing="0">
+  <thead>
+    <tr><th>Date</th><th>Sales</th><th>Units sold</th><th>Revenue</th></tr>
+  </thead>
+  <tbody>
+    {% for row in days %}
+    <tr>
+      <td>{{ row.date.strftime('%d %b %Y') }}</td>
+      <td>{{ row.sale_count }}</td>
+      <td>{{ row.units }}</td>
+      <td>{{ "%.2f"|format(row.revenue) }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>No sales found for this period.</p>
+{% endif %}
+{% endif %}
+
+<p>
+  <a href="{{ url_for('reports.inventory_report') }}">Inventory report</a>
+</p>
+{% endblock %}
