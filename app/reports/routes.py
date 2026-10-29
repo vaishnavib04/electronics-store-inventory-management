@@ -158,20 +158,31 @@ def sales_report():
     if start and end and start > end:
         errors.append("Start date cannot be after the end date.")
 
+    raw_start = request.args.get("start", "")
+    raw_end = request.args.get("end", "")
+
     if errors:
+        # Show only the validation errors and the form, so nobody mistakes
+        # unfiltered figures for the range they asked for.
         for error in errors:
             flash(error, "error")
-        start = end = None  # fall back to all sales rather than guessing
+        return render_template(
+            "reports/sales.html",
+            show_results=False,
+            raw_start=raw_start,
+            raw_end=raw_end,
+        ), 400
 
     summary, products, days, sale_rows = build_sales_report(start, end)
     return render_template(
         "reports/sales.html",
+        show_results=True,
         summary=summary,
         products=products,
         days=days,
         sale_rows=sale_rows,
         start=start,
         end=end,
-        raw_start=request.args.get("start", ""),
-        raw_end=request.args.get("end", ""),
-    ), (400 if errors else 200)
+        raw_start=raw_start,
+        raw_end=raw_end,
+    )
