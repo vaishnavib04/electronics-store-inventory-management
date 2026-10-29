@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Sale #{{ sale.sale_id }} | ESIMS{% endblock %}
+{% block content %}
+<h2>Sale #{{ sale.sale_id }}</h2>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for category, message in messages %}
+    <p class="flash {{ category }}" role="alert">{{ message }}</p>
+  {% endfor %}
+{% endwith %}
+
+<p>
+  Date and time: {{ sale.sale_datetime.strftime('%d %b %Y %H:%M') }}<br>
+  Recorded by: {{ sale.user.username }}<br>
+  Status: {{ sale.status }}
+</p>
+
+<table border="1" cellpadding="6" cellspacing="0">
+  <thead>
+    <tr>
+      <th>SKU</th>
+      <th>Product</th>
+      <th>Quantity</th>
+      <th>Unit price</th>
+      <th>Line total</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in items %}
+    <tr>
+      <td>{{ item.sku }}</td>
+      <td>{{ item.product_name }}</td>
+      <td>{{ item.quantity }}</td>
+      <td>{{ "%.2f"|format(item.unit_price) }}</td>
+      <td>{{ "%.2f"|format(item.line_total) }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+  <tfoot>
+    <tr>
+      <th colspan="4">Total</th>
+      <th>{{ "%.2f"|format(sale.total_amount) }}</th>
+    </tr>
+  </tfoot>
+</table>
+
+<p>
+  <a href="{{ url_for('sales.list_sales') }}">Back to sales</a> ·
+  <a href="{{ url_for('sales.create_sale') }}">Record another sale</a>
+</p>
+{% endblock %}
