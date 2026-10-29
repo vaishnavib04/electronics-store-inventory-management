@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Inventory Report | ESIMS{% endblock %}
+{% block content %}
+<h2>Inventory report</h2>
+<p>Generated {{ generated_at.strftime('%d %b %Y %H:%M') }}. Active products only.</p>
+
+<table border="1" cellpadding="6" cellspacing="0">
+  <tbody>
+    <tr><th>Active products</th><td>{{ summary.product_count }}</td></tr>
+    <tr><th>Total units in stock</th><td>{{ summary.total_units }}</td></tr>
+    <tr><th>Total stock value</th><td>{{ "%.2f"|format(summary.total_value) }}</td></tr>
+    <tr><th>Low-stock products</th><td>{{ summary.low_stock_count }}</td></tr>
+    <tr><th>Out-of-stock products</th><td>{{ summary.out_of_stock_count }}</td></tr>
+  </tbody>
+</table>
+
+<h3>Stock by product</h3>
+{% if rows %}
+<table border="1" cellpadding="6" cellspacing="0">
+  <thead>
+    <tr>
+      <th>SKU</th>
+      <th>Product</th>
+      <th>Category</th>
+      <th>Quantity on hand</th>
+      <th>Reorder level</th>
+      <th>Unit price</th>
+      <th>Stock value</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in rows %}
+    <tr>
+      <td>{{ row.sku }}</td>
+      <td>{{ row.name }}</td>
+      <td>{{ row.category }}</td>
+      <td>{{ row.quantity_on_hand }}</td>
+      <td>{{ row.reorder_level }}</td>
+      <td>{{ "%.2f"|format(row.unit_price) }}</td>
+      <td>{{ "%.2f"|format(row.stock_value) }}</td>
+      <td>{% if row.quantity_on_hand == 0 %}Out of stock{% elif row.is_low %}Low stock{% else %}OK{% endif %}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>No active products found.</p>
+{% endif %}
+
+<p>
+  <a href="{{ url_for('inventory.low_stock_report') }}">View low-stock items</a> ·
+  <a href="{{ url_for('reports.sales_report') }}">Sales report</a>
+</p>
+{% endblock %}

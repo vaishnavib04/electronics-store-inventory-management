@@ -153,9 +153,29 @@ def _to_row(product, inventory):
         "category": category.name if category else "—",
         "quantity_on_hand": qty,
         "reorder_level": product.reorder_level,
+        "unit_price": product.unit_price,
         "is_low": is_low_stock(qty, product.reorder_level),
         "last_updated": inventory.last_updated if inventory else None,
     }
+
+
+def get_inventory_rows(search="", low_only=False):
+    """Stock rows for every active product (shared with the reports module).
+
+    search:   optional text matched against product name or SKU.
+    low_only: only products at or below their reorder level, lowest stock first.
+    """
+    query = _inventory_query()
+    if search:
+        pattern = f"%{search}%"
+        query = query.filter(or_(Product.name.ilike(pattern), Product.sku.ilike(pattern)))
+    if low_only:
+        query = query.filter(_stock_qty() <= Product.reorder_level).order_by(
+            _stock_qty(), Product.name
+        )
+    else:
+        query = query.order_by(Product.name)
+    return [_to_row(p, inv) for p, inv in query.all()]
 
 
 # ---------------------------------------------------------------------------
@@ -165,23 +185,12 @@ def _to_row(product, inventory):
 @login_required
 def list_inventory():
     search = request.args.get("q", "").strip()
-    query = _inventory_query()
-    if search:
-        pattern = f"%{search}%"
-        query = query.filter(or_(Product.name.ilike(pattern), Product.sku.ilike(pattern)))
-    rows = query.order_by(Product.name).all()
-    items = [_to_row(p, inv) for p, inv in rows]
+    items = get_inventory_rows(search=search)
     return render_template("inventory/list.html", items=items, search=search)
 
 
 @inventory_bp.route("/inventory/low-stock")
 @login_required
 def low_stock_report():
-    rows = (
-        _inventory_query()
-        .filter(_stock_qty() <= Product.reorder_level)
-        .order_by(_stock_qty(), Product.name)
-        .all()
-    )
-    items = [_to_row(p, inv) for p, inv in rows]
+    items = get_inventory_rows(low_only=True)
     return render_template("inventory/low_stock.html", items=items)
