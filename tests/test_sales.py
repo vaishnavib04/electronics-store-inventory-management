@@ -130,6 +130,27 @@ def test_sales_pages_require_login(client, path):
     assert "/login" in resp.headers["Location"]
 
 
+@pytest.mark.parametrize("role", ["Store Staff", "Administrator"])
+def test_both_roles_can_use_all_sales_pages(app, client, data, role):
+    """SRS 2.3: Store Staff record sales; Store Manager/Administrator has access
+    to all functions. So both roles must be able to list, create and view sales."""
+    user = User(username=f"role_{role.replace(' ', '_')}",
+                password_hash=generate_password_hash("x"), role=role, is_active=True)
+    db.session.add(user)
+    db.session.commit()
+    with client.session_transaction() as sess:
+        sess["_user_id"] = str(user.user_id)
+        sess["_fresh"] = True
+
+    assert client.get("/sales").status_code == 200
+    assert client.get("/sales/new").status_code == 200
+    resp = _sell(client, (data["phone"], 1))
+    assert resp.status_code == 302
+    sale = db.session.query(Sale).one()
+    assert sale.user_id == user.user_id
+    assert client.get(f"/sales/{sale.sale_id}").status_code == 200
+
+
 def test_post_new_sale_requires_login(client, data):
     resp = _sell(client, (data["phone"], 1))
     assert resp.status_code == 302
