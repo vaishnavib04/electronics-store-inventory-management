@@ -1,78 +1,93 @@
+{% extends "base.html" %}
+{% block title %}Record Purchase | ESIMS{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3 mb-0">Record Purchase</h1>
+  <a href="{{ url_for('purchases.list_purchases') }}" class="btn btn-outline-secondary btn-sm">Back to purchases</a>
+</div>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Record Purchase - ESIMS</title>
-</head>
-<body>
-    <h1>Record Purchase</h1>
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ 'danger' if category == 'error' else category }} message {{ category }}" role="alert">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <ul>
-                {% for category, message in messages %}
-                    <li class="{{ category }}">{{ message }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-    {% endwith %}
+{% set selected_supplier_id = form_data.get('supplier_id', '') if form_data else (request.form.get('supplier_id', '') if request.method == 'POST' else '') %}
+{% set item_rows = rows if rows is defined and rows else ([{'product_id': form_data.get('product_id', ''), 'quantity': form_data.get('quantity', ''), 'unit_cost': form_data.get('unit_cost', '')}] if form_data else [{'product_id': '', 'quantity': '', 'unit_cost': ''}]) %}
 
+<div class="card shadow-sm">
+  <div class="card-body">
     <form method="POST" action="{{ url_for('purchases.create_purchase') }}">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-        <label for="supplier_id">Supplier:</label>
-        <select name="supplier_id" id="supplier_id" required>
-            <option value="">Select supplier</option>
-            {% for supplier in suppliers %}
-                <option value="{{ supplier.supplier_id }}"
-                    {% if form_data.get('supplier_id', '')|string == supplier.supplier_id|string %}selected{% endif %}>
-                    {{ supplier.name }}
-                </option>
-            {% endfor %}
+      <div class="mb-3">
+        <label for="supplier_id" class="form-label">Supplier</label>
+        <select name="supplier_id" id="supplier_id" class="form-select" required>
+          <option value="">Select supplier</option>
+          {% for supplier in suppliers %}
+            <option value="{{ supplier.supplier_id }}"
+              {% if selected_supplier_id|string == supplier.supplier_id|string %}selected{% endif %}>
+              {{ supplier.name }}
+            </option>
+          {% endfor %}
         </select>
+      </div>
 
-        <h2>Products</h2>
+      <h2 class="h5 mt-4 mb-3">Products</h2>
 
-        <div id="purchase-items">
-            <div class="purchase-item">
-                <label>Product:</label>
-                <select name="product_id" required>
-                    <option value="">Select product</option>
-                    {% for product in products %}
-                        <option value="{{ product.product_id }}">
-                            {{ product.name }} ({{ product.sku }})
-                        </option>
-                    {% endfor %}
-                </select>
+      <div id="purchase-items">
+        {% for row in item_rows %}
+        <div class="purchase-item row g-3 align-items-end mb-3">
+          <div class="col-md-6">
+            <label class="form-label">Product</label>
+            <select name="product_id" class="form-select" required>
+              <option value="">Select product</option>
+              {% for product in products %}
+                <option value="{{ product.product_id }}"
+                  {% if row.product_id|string == product.product_id|string %}selected{% endif %}>
+                  {{ product.name }} ({{ product.sku }})
+                </option>
+              {% endfor %}
+            </select>
+          </div>
 
-                <label>Quantity:</label>
-                <input type="number" name="quantity" min="1" step="1" required>
+          <div class="col-md-3">
+            <label class="form-label">Quantity</label>
+            <input type="number" name="quantity" class="form-control" min="1" step="1" required value="{{ row.quantity }}">
+          </div>
 
-                <label>Unit cost:</label>
-                <input type="number" name="unit_cost" min="0" step="0.01" required>
-            </div>
+          <div class="col-md-3">
+            <label class="form-label">Unit cost</label>
+            <input type="number" name="unit_cost" class="form-control" min="0" step="0.01" required value="{{ row.unit_cost }}">
+          </div>
         </div>
+        {% endfor %}
+      </div>
 
-        <button type="button" id="add-item">Add another product</button>
-        <button type="submit">Record Purchase</button>
+      <div class="d-flex gap-2 mt-4">
+        <button type="button" id="add-item" class="btn btn-outline-secondary">Add another product</button>
+        <button type="submit" class="btn btn-primary">Record Purchase</button>
+        <a href="{{ url_for('purchases.list_purchases') }}" class="btn btn-link">Cancel</a>
+      </div>
     </form>
+  </div>
+</div>
 
-    <p><a href="{{ url_for('purchases.list_purchases') }}">Back to purchases</a></p>
+<script>
+  document.getElementById("add-item").addEventListener("click", function () {
+    const container = document.getElementById("purchase-items");
+    const firstItem = container.querySelector(".purchase-item");
+    const newItem = firstItem.cloneNode(true);
 
-    <script>
-        document.getElementById("add-item").addEventListener("click", function () {
-            const container = document.getElementById("purchase-items");
-            const firstItem = container.querySelector(".purchase-item");
-            const newItem = firstItem.cloneNode(true);
+    newItem.querySelectorAll("select, input").forEach(function (field) {
+      field.value = "";
+    });
 
-            newItem.querySelectorAll("select, input").forEach(function (field) {
-                field.value = "";
-            });
-
-            container.appendChild(newItem);
-        });
-    </script>
-</body>
-</html>
+    container.appendChild(newItem);
+  });
+</script>
+{% endblock %}
