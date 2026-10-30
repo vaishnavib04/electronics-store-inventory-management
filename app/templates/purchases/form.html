@@ -1,19 +1,13 @@
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Record Purchase - ESIMS</title>
-</head>
-<body>
+{% extends "base.html" %}
+{% block title %}Record Purchase - ESIMS{% endblock %}
+{% block content %}
     <h1>Record Purchase</h1>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             <ul>
                 {% for category, message in messages %}
-                    <li class="{{ category }}">{{ message }}</li>
+                    <li class="message {{ category }}" role="alert">{{ message }}</li>
                 {% endfor %}
             </ul>
         {% endif %}
@@ -74,5 +68,4 @@
             container.appendChild(newItem);
         });
     </script>
-</body>
-</html>
+{% endblock %}
