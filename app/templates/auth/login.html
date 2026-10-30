@@ -1,32 +1,40 @@
-
 {% extends "base.html" %}
 
 {% block title %}Login | ESIMS{% endblock %}
 
 {% block content %}
-<h2>Login</h2>
+<div class="row justify-content-center">
+  <div class="col-md-5">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h2 class="h4 mb-3">Login</h2>
 
-{% with messages = get_flashed_messages(with_categories=true) %}
-    {% for category, message in messages %}
-        <p role="alert">{{ message }}</p>
-    {% endfor %}
-{% endwith %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% for category, message in messages %}
+            <div class="alert alert-{{ 'danger' if category == 'error' else category }} message {{ category }}" role="alert">{{ message }}</div>
+          {% endfor %}
+        {% endwith %}
 
-<form method="POST" action="{{ url_for('auth.login') }}">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <form method="POST" action="{{ url_for('auth.login') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-    <div>
-        <label for="username">Username</label>
-        <input type="text" id="username" name="username"
-               maxlength="80" autocomplete="username" required>
+          <div class="mb-3">
+            <label for="username" class="form-label">Username</label>
+            <input type="text" id="username" name="username" class="form-control"
+                   maxlength="80" autocomplete="username" required
+                   value="{{ request.form.get('username', '') if request.method == 'POST' else '' }}">
+          </div>
+
+          <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" id="password" name="password" class="form-control"
+                   autocomplete="current-password" required>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100">Login</button>
+        </form>
+      </div>
     </div>
-
-    <div>
-        <label for="password">Password</label>
-        <input type="password" id="password" name="password"
-               autocomplete="current-password" required>
-    </div>
-
-    <button type="submit">Login</button>
-</form>
+  </div>
+</div>
 {% endblock %}

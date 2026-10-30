@@ -1,15 +1,80 @@
-
 {% extends "base.html" %}
 
 {% block title %}Dashboard | ESIMS{% endblock %}
 
 {% block content %}
-<h2>Welcome to ESIMS, {{ current_user.username }}!</h2>
-
-<p>Role: {{ current_user.role }}</p>
-
-<form method="POST" action="{{ url_for('auth.logout') }}">
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h2 class="h3 mb-1">Welcome to ESIMS, {{ current_user.username }}!</h2>
+    <p class="text-muted mb-0">Role: {{ current_user.role }}</p>
+  </div>
+  <form method="POST" action="{{ url_for('auth.logout') }}">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <button type="submit">Logout</button>
-</form>
+    <button type="submit" class="btn btn-outline-danger btn-sm">Logout</button>
+  </form>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for category, message in messages %}
+    <div class="alert alert-{{ 'danger' if category == 'error' else category }} message {{ category }}" role="status">{{ message }}</div>
+  {% endfor %}
+{% endwith %}
+
+<div class="row g-3">
+  <div class="col-md-4">
+    <div class="card h-100 shadow-sm">
+      <div class="card-body">
+        <h3 class="h5">Products</h3>
+        <p class="text-muted">Manage product catalogue, prices, SKUs, and reorder thresholds.</p>
+        <a href="{{ url_for('products.list_products') }}" class="btn btn-outline-primary btn-sm">View Products</a>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card h-100 shadow-sm">
+      <div class="card-body">
+        <h3 class="h5">Inventory</h3>
+        <p class="text-muted">Track real-time stock quantities and review low-stock items.</p>
+        <a href="{{ url_for('inventory.list_inventory') }}" class="btn btn-outline-primary btn-sm">View Inventory</a>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card h-100 shadow-sm">
+      <div class="card-body">
+        <h3 class="h5">Suppliers</h3>
+        <p class="text-muted">Maintain supplier contact details and records.</p>
+        <a href="{{ url_for('suppliers.list_suppliers') }}" class="btn btn-outline-primary btn-sm">View Suppliers</a>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card h-100 shadow-sm">
+      <div class="card-body">
+        <h3 class="h5">Purchases</h3>
+        <p class="text-muted">Record incoming supplier deliveries and replenish stock.</p>
+        <a href="{{ url_for('purchases.list_purchases') }}" class="btn btn-outline-primary btn-sm">View Purchases</a>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card h-100 shadow-sm">
+      <div class="card-body">
+        <h3 class="h5">Sales</h3>
+        <p class="text-muted">Record customer sales and view transaction history.</p>
+        <a href="{{ url_for('sales.list_sales') }}" class="btn btn-outline-primary btn-sm">View Sales</a>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card h-100 shadow-sm">
+      <div class="card-body">
+        <h3 class="h5">Reports</h3>
+        <p class="text-muted">Inspect inventory valuation and sales performance reports.</p>
+        <a href="{{ url_for('reports.inventory_report') }}" class="btn btn-outline-primary btn-sm me-2">Inventory Report</a>
+        <a href="{{ url_for('reports.sales_report') }}" class="btn btn-outline-secondary btn-sm">Sales Report</a>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}
