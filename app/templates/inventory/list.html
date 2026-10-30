@@ -1,12 +1,23 @@
 {% extends "base.html" %}
-{# ADJUST: if base.html uses a block name other than "content", change it here #}
+{% block title %}Inventory | ESIMS{% endblock %}
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
   <h1 class="h3 mb-0">Inventory</h1>
-  <a href="{{ url_for('inventory.low_stock_report') }}" class="btn btn-outline-warning btn-sm">
-    View low-stock items
-  </a>
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('products.list_products') }}" class="btn btn-outline-secondary btn-sm">
+      Manage products
+    </a>
+    <a href="{{ url_for('inventory.low_stock_report') }}" class="btn btn-outline-warning btn-sm">
+      View low-stock items
+    </a>
+  </div>
 </div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for category, message in messages %}
+    <p role="status" class="message {{ category }}">{{ message }}</p>
+  {% endfor %}
+{% endwith %}
 
 <form method="get" action="{{ url_for('inventory.list_inventory') }}" class="row g-2 mb-3" role="search">
   <div class="col-sm-8 col-md-6">
@@ -39,7 +50,7 @@
       {% for item in items %}
       <tr>
         <td>{{ item.sku }}</td>
-        <td>{{ item.name }}</td>
+        <td><a href="{{ url_for('products.view_product', product_id=item.product_id) }}">{{ item.name }}</a></td>
         <td>{{ item.category }}</td>
         <td class="text-end">{{ item.quantity_on_hand }}</td>
         <td class="text-end">{{ item.reorder_level }}</td>

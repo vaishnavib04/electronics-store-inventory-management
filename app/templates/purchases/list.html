@@ -1,19 +1,13 @@
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Purchases - ESIMS</title>
-</head>
-<body>
+{% extends "base.html" %}
+{% block title %}Purchases - ESIMS{% endblock %}
+{% block content %}
     <h1>Purchase Transactions</h1>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             <ul>
                 {% for category, message in messages %}
-                    <li class="{{ category }}">{{ message }}</li>
+                    <li class="message {{ category }}" role="status">{{ message }}</li>
                 {% endfor %}
             </ul>
         {% endif %}
@@ -24,7 +18,7 @@
     </p>
 
     {% if purchases %}
-        <table border="1" cellpadding="8" cellspacing="0">
+        <table border="1" cellpadding="8" cellspacing="0" class="table table-striped table-hover align-middle">
             <thead>
                 <tr>
                     <th>Purchase ID</th>
@@ -63,5 +57,4 @@
     {% endif %}
 
     <p><a href="{{ url_for('inventory.list_inventory') }}">View Inventory</a></p>
-</body>
-</html>
+{% endblock %}

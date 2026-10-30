@@ -1,18 +1,12 @@
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ "Edit Supplier" if supplier else "Add Supplier" }}</title>
-</head>
-<body>
+{% extends "base.html" %}
+{% block title %}{{ "Edit Supplier" if supplier else "Add Supplier" }} | ESIMS{% endblock %}
+{% block content %}
     <h1>{{ "Edit Supplier" if supplier else "Add Supplier" }}</h1>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
-                <p class="{{ category }}">{{ message }}</p>
+                <p class="message {{ category }}" role="alert">{{ message }}</p>
             {% endfor %}
         {% endif %}
     {% endwith %}
@@ -78,5 +72,4 @@
 
         <a href="{{ url_for('suppliers.list_suppliers') }}">Cancel</a>
     </form>
-</body>
-</html>
+{% endblock %}
