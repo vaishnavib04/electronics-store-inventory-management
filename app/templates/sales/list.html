@@ -1,44 +1,47 @@
 {% extends "base.html" %}
 {% block title %}Sales | ESIMS{% endblock %}
 {% block content %}
-<h2>Sales</h2>
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3 mb-0">Sales</h1>
+  <a href="{{ url_for('sales.create_sale') }}" class="btn btn-primary btn-sm">Record a new sale</a>
+</div>
 
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% for category, message in messages %}
-    <p class="flash {{ category }}" role="alert">{{ message }}</p>
+    <div class="alert alert-{{ 'danger' if category == 'error' else category }} flash message {{ category }}" role="alert">{{ message }}</div>
   {% endfor %}
 {% endwith %}
 
-<p><a href="{{ url_for('sales.create_sale') }}">Record a new sale</a></p>
-
 {% if sales %}
-<table border="1" cellpadding="6" cellspacing="0">
-  <thead>
-    <tr>
-      <th>Sale #</th>
-      <th>Date and time</th>
-      <th>Recorded by</th>
-      <th>Items</th>
-      <th>Total</th>
-      <th>Status</th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for sale in sales %}
-    <tr>
-      <td>{{ sale.sale_id }}</td>
-      <td>{{ sale.sale_datetime.strftime('%d %b %Y %H:%M') }}</td>
-      <td>{{ sale.user.username }}</td>
-      <td>{{ sale.items | sum(attribute='quantity') }}</td>
-      <td>{{ "%.2f"|format(sale.total_amount) }}</td>
-      <td>{{ sale.status }}</td>
-      <td><a href="{{ url_for('sales.view_sale', sale_id=sale.sale_id) }}">View</a></td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+<div class="table-responsive">
+  <table class="table table-striped table-hover align-middle">
+    <thead>
+      <tr>
+        <th>Sale #</th>
+        <th>Date and time</th>
+        <th>Recorded by</th>
+        <th class="text-end">Items</th>
+        <th class="text-end">Total</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for sale in sales %}
+      <tr>
+        <td>{{ sale.sale_id }}</td>
+        <td>{{ sale.sale_datetime.strftime('%d %b %Y %H:%M') }}</td>
+        <td>{{ sale.user.username }}</td>
+        <td class="text-end">{{ sale.items | sum(attribute='quantity') }}</td>
+        <td class="text-end">{{ "%.2f"|format(sale.total_amount) }}</td>
+        <td><span class="badge bg-success">{{ sale.status }}</span></td>
+        <td><a href="{{ url_for('sales.view_sale', sale_id=sale.sale_id) }}" class="btn btn-outline-primary btn-sm">View</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 {% else %}
-<p>No sales have been recorded yet.</p>
+<div class="alert alert-info">No sales have been recorded yet.</div>
 {% endif %}
 {% endblock %}

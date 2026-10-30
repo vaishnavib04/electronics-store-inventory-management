@@ -1,82 +1,89 @@
+{% extends "base.html" %}
+{% block title %}{{ "Edit Supplier" if supplier else "Add Supplier" }} | ESIMS{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3 mb-0">{{ "Edit Supplier" if supplier else "Add Supplier" }}</h1>
+  <a href="{{ url_for('suppliers.list_suppliers') }}" class="btn btn-outline-secondary btn-sm">Back to Suppliers</a>
+</div>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ "Edit Supplier" if supplier else "Add Supplier" }}</title>
-</head>
-<body>
-    <h1>{{ "Edit Supplier" if supplier else "Add Supplier" }}</h1>
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ 'danger' if category == 'error' else category }} message {{ category }}" role="alert">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <p class="{{ category }}">{{ message }}</p>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-
+<div class="card shadow-sm">
+  <div class="card-body">
     <form method="POST"
           action="{{ url_for('suppliers.edit_supplier', supplier_id=supplier.supplier_id) if supplier else url_for('suppliers.add_supplier') }}">
 
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-        <p>
-            <label for="name">Supplier Name *</label><br>
-            <input
-                type="text"
-                id="name"
-                name="name"
-                maxlength="150"
-                required
-                value="{{ form_data.get('name', supplier.name if supplier else '') }}"
-            >
-        </p>
+      <div class="mb-3">
+        <label for="name" class="form-label">Supplier Name *</label>
+        <input
+          type="text"
+          id="name"
+          name="name"
+          class="form-control"
+          maxlength="150"
+          required
+          value="{{ form_data.get('name', (supplier.name or '') if supplier else '') }}"
+        >
+      </div>
 
-        <p>
-            <label for="contact_person">Contact Person</label><br>
-            <input
-                type="text"
-                id="contact_person"
-                name="contact_person"
-                maxlength="100"
-                value="{{ form_data.get('contact_person', supplier.contact_person if supplier else '') }}"
-            >
-        </p>
+      <div class="mb-3">
+        <label for="contact_person" class="form-label">Contact Person</label>
+        <input
+          type="text"
+          id="contact_person"
+          name="contact_person"
+          class="form-control"
+          maxlength="100"
+          value="{{ form_data.get('contact_person', (supplier.contact_person or '') if supplier else '') }}"
+        >
+      </div>
 
-        <p>
-            <label for="phone">Phone Number</label><br>
-            <input
-                type="tel"
-                id="phone"
-                name="phone"
-                maxlength="30"
-                value="{{ form_data.get('phone', supplier.phone if supplier else '') }}"
-            >
-        </p>
+      <div class="mb-3">
+        <label for="phone" class="form-label">Phone Number</label>
+        <input
+          type="tel"
+          id="phone"
+          name="phone"
+          class="form-control"
+          maxlength="30"
+          value="{{ form_data.get('phone', (supplier.phone or '') if supplier else '') }}"
+        >
+      </div>
 
-        <p>
-            <label for="email">Email Address</label><br>
-            <input
-                type="email"
-                id="email"
-                name="email"
-                maxlength="150"
-                value="{{ form_data.get('email', supplier.email if supplier else '') }}"
-            >
-        </p>
+      <div class="mb-3">
+        <label for="email" class="form-label">Email Address</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          class="form-control"
+          maxlength="150"
+          value="{{ form_data.get('email', (supplier.email or '') if supplier else '') }}"
+        >
+      </div>
 
-        <p>
-            <label for="address">Address</label><br>
-            <textarea id="address" name="address">{{ form_data.get('address', supplier.address if supplier else '') }}</textarea>
-        </p>
+      <div class="mb-3">
+        <label for="address" class="form-label">Address</label>
+        <textarea id="address" name="address" class="form-control" rows="3">{{ form_data.get('address', (supplier.address or '') if supplier else '') }}</textarea>
+      </div>
 
-        <button type="submit">
-            {{ "Update Supplier" if supplier else "Save Supplier" }}
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary">
+          {{ "Update Supplier" if supplier else "Save Supplier" }}
         </button>
-
-        <a href="{{ url_for('suppliers.list_suppliers') }}">Cancel</a>
+        <a href="{{ url_for('suppliers.list_suppliers') }}" class="btn btn-outline-secondary">Cancel</a>
+      </div>
     </form>
-</body>
-</html>
+  </div>
+</div>
+{% endblock %}

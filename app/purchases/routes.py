@@ -1,4 +1,3 @@
-﻿
 from decimal import Decimal, InvalidOperation
 
 from flask import flash, redirect, render_template, request, url_for
@@ -16,6 +15,39 @@ from app.models import (
     Supplier,
 )
 from app.purchases import purchases_bp
+
+
+def _submitted_purchase_rows():
+    """Return submitted product/quantity/unit_cost rows to repopulate the form after an error."""
+    product_ids = request.form.getlist("product_id")
+    quantities = request.form.getlist("quantity")
+    unit_costs = request.form.getlist("unit_cost")
+    max_len = max(len(product_ids), len(quantities), len(unit_costs), 0)
+    rows = []
+    for idx in range(max_len):
+        pid = product_ids[idx].strip() if idx < len(product_ids) else ""
+        qty = quantities[idx].strip() if idx < len(quantities) else ""
+        cost = unit_costs[idx].strip() if idx < len(unit_costs) else ""
+        if pid or qty or cost:
+            rows.append({"product_id": pid, "quantity": qty, "unit_cost": cost})
+    return rows or [{"product_id": "", "quantity": "", "unit_cost": ""}]
+
+
+def _render_purchase_form(form_data=None, rows=None, status=200):
+    return (
+        render_template(
+            "purchases/form.html",
+            suppliers=Supplier.query.filter_by(is_active=True)
+            .order_by(Supplier.name)
+            .all(),
+            products=Product.query.filter_by(is_active=True)
+            .order_by(Product.name)
+            .all(),
+            form_data=form_data if form_data is not None else {},
+            rows=rows or [{"product_id": "", "quantity": "", "unit_cost": ""}],
+        ),
+        status,
+    )
 
 
 def _read_purchase_form():
@@ -120,16 +152,11 @@ def create_purchase():
         values, error = _read_purchase_form()
         if error:
             flash(error, "error")
-            return render_template(
-                "purchases/form.html",
-                suppliers=Supplier.query.filter_by(is_active=True)
-                .order_by(Supplier.name)
-                .all(),
-                products=Product.query.filter_by(is_active=True)
-                .order_by(Product.name)
-                .all(),
+            return _render_purchase_form(
                 form_data=request.form,
-            ), 400
+                rows=_submitted_purchase_rows(),
+                status=400,
+            )
 
         try:
             purchase = Purchase(
@@ -185,27 +212,13 @@ def create_purchase():
                 "Unable to record the purchase. No purchase or stock changes were saved.",
                 "error",
             )
-            return render_template(
-                "purchases/form.html",
-                suppliers=Supplier.query.filter_by(is_active=True)
-                .order_by(Supplier.name)
-                .all(),
-                products=Product.query.filter_by(is_active=True)
-                .order_by(Product.name)
-                .all(),
+            return _render_purchase_form(
                 form_data=request.form,
-            ), 500
+                rows=_submitted_purchase_rows(),
+                status=500,
+            )
 
         flash("Purchase recorded successfully.", "success")
         return redirect(url_for("purchases.list_purchases"))
 
-    return render_template(
-        "purchases/form.html",
-        suppliers=Supplier.query.filter_by(is_active=True)
-        .order_by(Supplier.name)
-        .all(),
-        products=Product.query.filter_by(is_active=True)
-        .order_by(Product.name)
-        .all(),
-        form_data={},
-    )
+    return _render_purchase_form()
