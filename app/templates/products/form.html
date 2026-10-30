@@ -1,44 +1,53 @@
 {% extends "base.html" %}
 {% block title %}{{ title }} | ESIMS{% endblock %}
 {% block content %}
-<h2>{{ title }}</h2>
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3 mb-0">{{ title }}</h1>
+  <a href="{{ url_for('products.list_products') }}" class="btn btn-outline-secondary btn-sm">Back to products</a>
+</div>
 
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% for category, message in messages %}
-    <p role="alert" class="message {{ category }}">{{ message }}</p>
+    <div role="alert" class="alert alert-{{ 'danger' if category == 'error' else category }} message {{ category }}">{{ message }}</div>
   {% endfor %}
 {% endwith %}
 
 {% set values = request.form if request.method == 'POST' else product %}
-<form method="post" action="{{ url_for(endpoint, product_id=product.product_id) if product else url_for(endpoint) }}">
-  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-  <div>
-    <label for="name">Product name</label>
-    <input id="name" name="name" maxlength="150" required value="{{ values.name if values else '' }}">
+<div class="card shadow-sm">
+  <div class="card-body">
+    <form method="post" action="{{ url_for(endpoint, product_id=product.product_id) if product else url_for(endpoint) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="mb-3">
+        <label for="name" class="form-label">Product name</label>
+        <input id="name" name="name" class="form-control" maxlength="150" required value="{{ values.name if values else '' }}">
+      </div>
+      <div class="mb-3">
+        <label for="sku" class="form-label">SKU</label>
+        <input id="sku" name="sku" class="form-control" maxlength="80" required value="{{ values.sku if values else '' }}">
+      </div>
+      <div class="mb-3">
+        <label for="category_id" class="form-label">Category</label>
+        <select id="category_id" name="category_id" class="form-select" required>
+          <option value="">Select a category</option>
+          {% for category in categories %}
+            <option value="{{ category.category_id }}" {% if values and (values.category_id|string) == (category.category_id|string) %}selected{% endif %}>{{ category.name }}</option>
+          {% endfor %}
+        </select>
+        {% if not categories %}<div class="form-text text-warning">Add a category before creating products.</div>{% endif %}
+      </div>
+      <div class="mb-3">
+        <label for="unit_price" class="form-label">Unit price</label>
+        <input id="unit_price" name="unit_price" class="form-control" type="number" min="0" step="0.01" required value="{{ values.unit_price if values else '' }}">
+      </div>
+      <div class="mb-3">
+        <label for="reorder_level" class="form-label">Reorder level</label>
+        <input id="reorder_level" name="reorder_level" class="form-control" type="number" min="0" step="1" required value="{{ values.reorder_level if values else '' }}">
+      </div>
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Save product</button>
+        <a href="{{ url_for('products.list_products') }}" class="btn btn-outline-secondary">Cancel</a>
+      </div>
+    </form>
   </div>
-  <div>
-    <label for="sku">SKU</label>
-    <input id="sku" name="sku" maxlength="80" required value="{{ values.sku if values else '' }}">
-  </div>
-  <div>
-    <label for="category_id">Category</label>
-    <select id="category_id" name="category_id" required>
-      <option value="">Select a category</option>
-      {% for category in categories %}
-        <option value="{{ category.category_id }}" {% if values and (values.category_id|string) == (category.category_id|string) %}selected{% endif %}>{{ category.name }}</option>
-      {% endfor %}
-    </select>
-    {% if not categories %}<p>Add a category before creating products.</p>{% endif %}
-  </div>
-  <div>
-    <label for="unit_price">Unit price</label>
-    <input id="unit_price" name="unit_price" type="number" min="0" step="0.01" required value="{{ values.unit_price if values else '' }}">
-  </div>
-  <div>
-    <label for="reorder_level">Reorder level</label>
-    <input id="reorder_level" name="reorder_level" type="number" min="0" step="1" required value="{{ values.reorder_level if values else '' }}">
-  </div>
-  <button type="submit">Save product</button>
-  <a href="{{ url_for('products.list_products') }}">Cancel</a>
-</form>
+</div>
 {% endblock %}
