@@ -8,18 +8,20 @@ This provides limited evidence of availability during the test session. Sustaine
 
 ### Usability
 
-Basic manual checks were performed on the available application interfaces, including login, inventory viewing, product search, low-stock viewing, and available product, supplier, and purchase forms. These interfaces appeared to function during testing.
+Manual browser checks covered login, inventory viewing, product search, low-stock viewing, product creation/editing, supplier creation/editing, purchase, sales, reports, navigation, and logout. The tested workflows completed without critical usability errors.
 
-Integrated navigation between pages and logout behavior still require verification after the relevant application pages are connected. Sales-related workflows and other unfinished features must also be tested when available.
+These checks provide practical usability evidence, but they do not establish formal user-study metrics.
 
-These checks provide preliminary usability evidence but do not establish that all common tasks can be completed without critical usability errors.
+## 8. Automated NFR Test Results
 
-## 8. Conclusion
+The focused NFR suite contains 20 tests in [`test_nfr_performance.py`](../../tests/test_nfr_performance.py) and [`test_nfr_security.py`](../../tests/test_nfr_security.py). It verifies the 90% response-time criterion for inventory and product reads, purchase and sales recording, protected routes, inactive-user rejection, password hashing, invalid input handling, logout session invalidation, and unauthenticated modification attempts.
 
-The automated test suite completed with 79 passing tests and 3 skipped tests. All three measured inventory endpoints satisfied the 3-second response-time threshold under the isolated performance-testing conditions.
+The focused suite completed with 20 passing tests. The complete automated suite completed with 169 passing tests and 3 skipped MySQL-specific tests. Performance results apply to the isolated SQLite test fixture and the measured requests only.
 
-Existing automated tests also passed for the purchase, inventory, authentication, and validation behaviors they cover.
+## 9. Conclusion
 
-A basic manual availability check and preliminary usability checks were completed for the currently available interfaces. However, sustained availability, integrated navigation, complete usability verification, sales-related reliability, concurrent transactions, and database-specific checks skipped during testing require further verification.
+The focused NFR suite passed all 20 tests. Existing module tests also cover purchase, sales, inventory, authentication, and validation behavior.
 
-The results demonstrate progress toward the project's non-functional requirements, but they do not establish that every NFR has been fully verified.
+A basic manual availability check and browser usability checks were completed for the currently available interfaces. However, sustained availability, formal usability-study metrics, role-specific authorization, concurrent transactions, and database-specific checks skipped during testing require further verification.
+
+The application is accessed through `/login`; the root `/` route currently returns 404 because no root route is defined. The results demonstrate progress toward the project's non-functional requirements, but role-specific authorization and continuous availability are not fully verified.

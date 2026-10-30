@@ -10,7 +10,7 @@ def performance_data(monkeypatch):
 
     from app import create_app
     from app.extensions import db
-    from app.models import User, Category, Product, Inventory
+    from app.models import User, Category, Product, Inventory, Supplier
     from werkzeug.security import generate_password_hash
 
     app = create_app()
@@ -26,7 +26,8 @@ def performance_data(monkeypatch):
             is_active=True,
         )
         category = Category(name="NFR Test Category")
-        db.session.add_all([user, category])
+        supplier = Supplier(name="NFR Test Supplier", is_active=True)
+        db.session.add_all([user, category, supplier])
         db.session.flush()
 
         products = [
@@ -71,10 +72,11 @@ def performance_data(monkeypatch):
         "/inventory",
         "/inventory?q=NFR-050",
         "/inventory/low-stock",
+        "/products?q=NFR-050",
     ],
 )
-def test_inventory_response_time_under_3_seconds(performance_data, path):
-    """Measure authenticated inventory response time against the 3-second target."""
+def test_common_read_response_time_meets_srs_target(performance_data, path):
+    """At least 90% of common read requests must complete within three seconds."""
     client = performance_data
 
     warmup = client.get(path)
@@ -84,7 +86,7 @@ def test_inventory_response_time_under_3_seconds(performance_data, path):
 
     timings = []
 
-    for _ in range(5):
+    for _ in range(10):
         start = time.perf_counter()
         response = client.get(path)
         elapsed = time.perf_counter() - start
@@ -95,13 +97,60 @@ def test_inventory_response_time_under_3_seconds(performance_data, path):
         timings.append(elapsed)
 
     average = sum(timings) / len(timings)
-    maximum = max(timings)
+    passing = sum(elapsed < 3.0 for elapsed in timings)
+    pass_rate = passing / len(timings)
 
     print(f"\nNFR performance: {path}")
     print(f"Runs: {len(timings)}")
     print(f"Average response time: {average:.4f} seconds")
-    print(f"Maximum response time: {maximum:.4f} seconds")
+    print(f"Requests under 3 seconds: {passing}/{len(timings)}")
+    print(f"Pass rate: {pass_rate:.0%}")
 
-    assert maximum < 3.0, (
-        f"{path} exceeded the 3-second target: maximum {maximum:.4f} seconds"
+    assert pass_rate >= 0.9, (
+        f"{path} met the 3-second target for only {pass_rate:.0%} "
+        f"of requests; expected at least 90%."
+    )
+
+
+def test_purchase_and_sale_response_time_under_3_seconds(performance_data):
+    """Recording common purchase and sale operations must stay under three seconds."""
+    client = performance_data
+    with client.application.app_context():
+        from app.models import Product, Supplier
+
+        product = Product.query.filter_by(sku="NFR-000").one()
+        supplier = Supplier.query.filter_by(name="NFR Test Supplier").one()
+        product_id = product.product_id
+        supplier_id = supplier.supplier_id
+
+    timings = []
+    for _ in range(10):
+        start = time.perf_counter()
+        response = client.post(
+            "/purchases/new",
+            data={
+                "supplier_id": str(supplier_id),
+                "product_id": [str(product_id)],
+                "quantity": ["1"],
+                "unit_cost": ["10.00"],
+            },
+        )
+        elapsed = time.perf_counter() - start
+        assert response.status_code == 302
+        timings.append(elapsed)
+
+    for _ in range(10):
+        start = time.perf_counter()
+        response = client.post(
+            "/sales/new",
+            data={"product_id": [str(product_id)], "quantity": ["1"]},
+        )
+        elapsed = time.perf_counter() - start
+        assert response.status_code == 302
+        timings.append(elapsed)
+
+    passing = sum(elapsed < 3.0 for elapsed in timings)
+    assert passing / len(timings) >= 0.9, (
+        f"Only {passing}/{len(timings)} transaction requests completed "
+        "within three seconds; expected at least 90%."
     )
