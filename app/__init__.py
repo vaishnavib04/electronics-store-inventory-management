@@ -6,8 +6,6 @@ from app.products.routes import products_bp
 from app.inventory.routes import inventory_bp
 from app.suppliers.routes import suppliers_bp
 from app.purchases.routes import purchases_bp
-from app.sales.routes import sales_bp
-from app.reports.routes import reports_bp
 
 
 def create_app():
@@ -24,8 +22,6 @@ def create_app():
     app.register_blueprint(inventory_bp)
     app.register_blueprint(suppliers_bp)
     app.register_blueprint(purchases_bp)
-    app.register_blueprint(sales_bp)
-    app.register_blueprint(reports_bp)
 
     @app.route("/")
     def index():
