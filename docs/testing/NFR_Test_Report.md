@@ -16,7 +16,7 @@ These checks provide preliminary usability evidence but do not establish that al
 
 ## 8. Conclusion
 
-The automated test suite completed with 79 passing tests and 3 skipped tests. All three measured inventory endpoints satisfied the 3-second response-time threshold under the isolated performance-testing conditions.
+The automated test suite completed with 153 passing tests and 3 skipped tests. All three measured inventory endpoints satisfied the 3-second response-time threshold under the isolated performance-testing conditions.
 
 Existing automated tests also passed for the purchase, inventory, authentication, and validation behaviors they cover.
 
