@@ -1,4 +1,4 @@
-# Electronics Store Inventory Management System (ESIMS)
+﻿# Electronics Store Inventory Management System (ESIMS)
 
 ## Overview
 
@@ -15,27 +15,31 @@ The Electronics Store Inventory Management System (ESIMS) is a web-based applica
 - **Version Control:** Git and GitHub
 - **Continuous Integration:** GitHub Actions
 
-## Planned Features
+## Implemented Features
 
-- Role-based access control
-- Product and category management screens
-- Purchase and sales transaction management
-- Stock movement history
-- Inventory and sales reports
+- User login, logout, protected routes, and dashboard
+- Product catalogue management with search, editing, validation, and deactivation
+- Inventory listing, product/SKU search, and low-stock reporting
+- Supplier listing, creation, editing, and input validation
+- Purchase transaction recording with automatic stock increases
+- Sales transaction recording with server-side price calculation and stock decreases
+- Stock movement history for incoming and outgoing stock
+- Inventory valuation and sales reports with optional date filtering
+- Database constraints, transaction rollback, and concurrency-safe stock reduction
+- Automated unit, integration, validation, performance, and database tests
 
-## Sprint 1 Demonstration
+## Sprint Demonstrations
 
-The Sprint 1 working product demonstration is available here:
+The working product demonstrations are available here:
 
 [Watch the Sprint 1 demonstration](./sprint_videos/sprint1_demo.mp4)
 
-Sprint 1 currently includes:
+[Watch the Sprint 2 demonstration](./sprint_videos/sprint2_demo.mp4)
 
-- User login, logout, and protected dashboard
-- Inventory listing and search by product name or SKU
-- Low-stock reporting
-- Supplier listing, creation, and editing
-- Database models, validation, and automated tests
+Sprint 1 delivered the core authentication, inventory, and supplier workflows.
+
+Sprint 2 completed the product, purchase, sales, stock movement, and reporting
+workflows and integrated them with the existing inventory system.
 
 ## Repository Structure
 
@@ -71,7 +75,9 @@ electronics-store-inventory-management/
 └── README.md
 ```
 
-The application folders and files are being developed incrementally.
+The `app/` package contains the Flask application, feature blueprints, database
+models, routes, and Jinja templates. The `tests/` package contains automated
+tests, while `docs/testing/` contains the non-functional test cases and report.
 
 ## Prerequisites
 
@@ -105,7 +111,7 @@ py -m pip install -r requirements.txt
 
 ### 4. Configure the database
 
-Create a MySQL database named `esims_db`, or use the database name agreed upon by the team.
+Create a MySQL database named `esims_db`.
 
 Create a `.env` file in the project root:
 
@@ -145,4 +151,13 @@ py -m pytest -v
 
 ## Project Status
 
-Sprint 1 is complete with working authentication, inventory, low-stock reporting, supplier management, database models, automated tests, and continuous integration. Additional product, purchase, sales, reporting, and role-based access-control features are planned for future sprints.
+Sprint 2 is complete. ESIMS currently provides authentication, product
+management, supplier management, inventory tracking, purchase and sales
+transactions, stock movement recording, low-stock alerts, and inventory and
+sales reports.
+
+The application has automated tests and a GitHub Actions workflow. The
+non-functional test report records the current performance, reliability,
+security, availability, and usability verification status. Sustained
+availability, complete usability verification, and some database-specific
+checks may require additional testing in future iterations.
