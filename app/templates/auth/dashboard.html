@@ -3,14 +3,14 @@
 {% block title %}Dashboard | ESIMS{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="page-heading d-flex justify-content-between align-items-center">
   <div>
     <h2 class="h3 mb-1">Welcome to ESIMS, {{ current_user.username }}!</h2>
-    <p class="text-muted mb-0">Role: {{ current_user.role }}</p>
+    <p class="text-muted mb-0">Role: {{ current_user.role }} &middot; Manage products, stock, suppliers, purchases, and sales.</p>
   </div>
   <form method="POST" action="{{ url_for('auth.logout') }}">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <button type="submit" class="btn btn-outline-danger btn-sm">Logout</button>
+    <button type="submit" class="btn btn-outline-danger btn-sm"><i class="bi bi-box-arrow-right me-1"></i>Logout</button>
   </form>
 </div>
 
@@ -22,8 +22,9 @@
 
 <div class="row g-3">
   <div class="col-md-4">
-    <div class="card h-100 shadow-sm">
+    <div class="card dashboard-card h-100">
       <div class="card-body">
+        <span class="dashboard-icon mb-3"><i class="bi bi-box"></i></span>
         <h3 class="h5">Products</h3>
         <p class="text-muted">Manage product catalogue, prices, SKUs, and reorder thresholds.</p>
         <a href="{{ url_for('products.list_products') }}" class="btn btn-outline-primary btn-sm">View Products</a>
@@ -31,8 +32,9 @@
     </div>
   </div>
   <div class="col-md-4">
-    <div class="card h-100 shadow-sm">
+    <div class="card dashboard-card h-100">
       <div class="card-body">
+        <span class="dashboard-icon mb-3"><i class="bi bi-clipboard-data"></i></span>
         <h3 class="h5">Inventory</h3>
         <p class="text-muted">Track real-time stock quantities and review low-stock items.</p>
         <a href="{{ url_for('inventory.list_inventory') }}" class="btn btn-outline-primary btn-sm">View Inventory</a>
@@ -40,8 +42,9 @@
     </div>
   </div>
   <div class="col-md-4">
-    <div class="card h-100 shadow-sm">
+    <div class="card dashboard-card h-100">
       <div class="card-body">
+        <span class="dashboard-icon mb-3"><i class="bi bi-people"></i></span>
         <h3 class="h5">Suppliers</h3>
         <p class="text-muted">Maintain supplier contact details and records.</p>
         <a href="{{ url_for('suppliers.list_suppliers') }}" class="btn btn-outline-primary btn-sm">View Suppliers</a>
@@ -49,8 +52,9 @@
     </div>
   </div>
   <div class="col-md-4">
-    <div class="card h-100 shadow-sm">
+    <div class="card dashboard-card h-100">
       <div class="card-body">
+        <span class="dashboard-icon mb-3"><i class="bi bi-cart-plus"></i></span>
         <h3 class="h5">Purchases</h3>
         <p class="text-muted">Record incoming supplier deliveries and replenish stock.</p>
         <a href="{{ url_for('purchases.list_purchases') }}" class="btn btn-outline-primary btn-sm">View Purchases</a>
@@ -58,8 +62,9 @@
     </div>
   </div>
   <div class="col-md-4">
-    <div class="card h-100 shadow-sm">
+    <div class="card dashboard-card h-100">
       <div class="card-body">
+        <span class="dashboard-icon mb-3"><i class="bi bi-cart-check"></i></span>
         <h3 class="h5">Sales</h3>
         <p class="text-muted">Record customer sales and view transaction history.</p>
         <a href="{{ url_for('sales.list_sales') }}" class="btn btn-outline-primary btn-sm">View Sales</a>
@@ -67,8 +72,9 @@
     </div>
   </div>
   <div class="col-md-4">
-    <div class="card h-100 shadow-sm">
+    <div class="card dashboard-card h-100">
       <div class="card-body">
+        <span class="dashboard-icon mb-3"><i class="bi bi-bar-chart-line"></i></span>
         <h3 class="h5">Reports</h3>
         <p class="text-muted">Inspect inventory valuation and sales performance reports.</p>
         <a href="{{ url_for('reports.inventory_report') }}" class="btn btn-outline-primary btn-sm me-2">Inventory Report</a>
