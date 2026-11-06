@@ -1,0 +1,112 @@
+:root {
+    --esims-primary: #2563eb;
+    --esims-primary-dark: #1e3a8a;
+    --esims-ink: #172033;
+    --esims-muted: #64748b;
+    --esims-surface: #ffffff;
+    --esims-background: #f3f6fb;
+}
+
+body {
+    background: var(--esims-background);
+    color: var(--esims-ink);
+}
+
+.esims-navbar {
+    background: linear-gradient(120deg, #0f172a, var(--esims-primary-dark));
+}
+
+.esims-brand {
+    letter-spacing: 0.01em;
+}
+
+.esims-nav .nav-link {
+    border-radius: 0.5rem;
+    color: #dbeafe !important;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.esims-nav .nav-link:hover,
+.esims-nav .nav-link:focus {
+    background: rgba(255, 255, 255, 0.14);
+    color: #ffffff !important;
+}
+
+.page-heading {
+    margin-bottom: 1.5rem;
+}
+
+.page-heading h1,
+.page-heading h2 {
+    font-weight: 700;
+}
+
+.card {
+    border: 0;
+    border-radius: 1rem;
+    box-shadow: 0 0.5rem 1.5rem rgba(15, 23, 42, 0.07);
+}
+
+.dashboard-card {
+    border-top: 3px solid var(--esims-primary);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dashboard-card:hover {
+    box-shadow: 0 0.75rem 1.75rem rgba(15, 23, 42, 0.12);
+    transform: translateY(-3px);
+}
+
+.dashboard-icon {
+    align-items: center;
+    background: #dbeafe;
+    border-radius: 0.75rem;
+    color: var(--esims-primary-dark);
+    display: inline-flex;
+    font-size: 1.25rem;
+    height: 2.75rem;
+    justify-content: center;
+    width: 2.75rem;
+}
+
+.form-control,
+.form-select {
+    border-radius: 0.65rem;
+    padding: 0.65rem 0.8rem;
+}
+
+.btn {
+    border-radius: 0.65rem;
+}
+
+.table-card {
+    overflow: hidden;
+}
+
+.table-card .table {
+    margin-bottom: 0;
+}
+
+.table thead th {
+    background: #eef4ff;
+    border-bottom: 0;
+    color: #334155;
+    font-size: 0.82rem;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
+.table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.login-panel {
+    max-width: 430px;
+}
+
+.login-brand {
+    background: linear-gradient(135deg, var(--esims-primary-dark), var(--esims-primary));
+    border-radius: 1rem 1rem 0 0;
+    color: #ffffff;
+    padding: 2rem;
+}
