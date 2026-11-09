@@ -9,10 +9,13 @@ from app.models import User
 
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():
-    if current_user.is_authenticated:
+    if current_user.is_authenticated and request.method == "GET":
         return redirect(url_for("auth.dashboard"))
 
     if request.method == "POST":
+        if current_user.is_authenticated:
+            logout_user()
+
         username = request.form.get("username", "").strip()
         password = request.form.get("password", "")
 
