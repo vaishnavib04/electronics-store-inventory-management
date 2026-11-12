@@ -6,7 +6,6 @@ from flask_login import current_user
 
 def role_required(*allowed_roles):
     """Require an authenticated user with one of the supplied roles."""
-
     def decorator(view):
         @wraps(view)
         def wrapped_view(*args, **kwargs):
