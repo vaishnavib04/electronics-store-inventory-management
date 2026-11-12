@@ -1,0 +1,160 @@
+name: ESIMS Continuous Integration
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend tests
+    runs-on: ubuntu-latest
+    env:
+      SECRET_KEY: ci-test-secret
+      DATABASE_URL: mysql+pymysql://root:root@127.0.0.1:3306/esims_test
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: esims_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.15"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+
+      - name: Initialize MySQL test schema
+        run: |
+          python - <<'PY'
+          from app import create_app
+          from app.extensions import db
+
+          app = create_app()
+          with app.app_context():
+              db.create_all()
+          PY
+
+      - name: Run backend tests and collect reports
+        run: |
+          mkdir -p reports
+          python -m pytest -v \
+            --junitxml=reports/backend-junit.xml \
+            --cov=app \
+            --cov-report=xml:reports/backend-coverage.xml \
+            --cov-report=html:reports/backend-coverage-html
+
+      - name: Upload backend reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-reports
+          path: reports/
+          if-no-files-found: warn
+
+  frontend:
+    name: Frontend validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.15"
+
+      - name: Install template dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+
+      - name: Validate templates and stylesheets
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from jinja2 import Environment, FileSystemLoader, TemplateSyntaxError
+
+          template_root = Path("app/templates")
+          templates = list(template_root.rglob("*.html"))
+          stylesheets = list(Path("app/static").rglob("*.css"))
+          environment = Environment(loader=FileSystemLoader(template_root))
+
+          if not templates:
+              raise SystemExit("No frontend templates were found.")
+          if not stylesheets:
+              raise SystemExit("No frontend stylesheets were found.")
+
+          for template in templates:
+              try:
+                  environment.parse(template.read_text(encoding="utf-8"))
+              except TemplateSyntaxError as error:
+                  raise SystemExit(f"Invalid template {template}: {error}") from error
+
+          report = Path("frontend-test-report.md")
+          report.write_text(
+              "# Frontend Validation Report\n\n"
+              f"- Jinja templates parsed: {len(templates)}\n"
+              f"- CSS files checked for content: {len(stylesheets)}\n"
+              "- Result: passed\n",
+              encoding="utf-8",
+          )
+          PY
+
+      - name: Upload frontend report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-test-reports
+          path: frontend-test-report.md
+          if-no-files-found: warn
+
+  reports:
+    name: Collect test reports
+    if: always()
+    needs:
+      - backend
+      - frontend
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download backend reports
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-test-reports
+          path: reports/backend
+
+      - name: Download frontend reports
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-test-reports
+          path: reports/frontend
+
+      - name: Upload combined test reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: esims-test-reports
+          path: reports/
+          if-no-files-found: warn

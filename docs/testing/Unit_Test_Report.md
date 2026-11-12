@@ -69,3 +69,19 @@ The three skipped tests require a MySQL database configuration for execution and
 The automated test suite completed successfully. All 153 executed passing tests produced the expected results, with no failures or errors. The three skipped MySQL-specific tests are documented as requiring additional database configuration.
 
 The generated JUnit XML report is available at `docs/testing/unit-test-report.xml` and provides the detailed test execution results.
+
+## 9. CI Reports
+
+The GitHub Actions pipeline is split into three workflows:
+
+- `ci.yml` runs MySQL-backed backend tests, frontend template validation, and
+  report collection.
+- `quality.yml` runs Ruff lint and formatting checks.
+- `security.yml` audits Python dependencies with `pip-audit`.
+
+After a CI workflow run completes, open the run in GitHub and download the
+`esims-test-reports` artifact. It contains:
+
+- The backend JUnit test report.
+- Backend XML and HTML coverage reports.
+- The frontend template and stylesheet validation report.
