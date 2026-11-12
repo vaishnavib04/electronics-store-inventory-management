@@ -18,6 +18,7 @@ The Electronics Store Inventory Management System (ESIMS) is a web-based applica
 ## Implemented Features
 
 - User login, logout, protected routes, and dashboard
+- Role-based access control for Administrator and Store Staff users
 - Product catalogue management with search, editing, validation, and deactivation
 - Inventory listing, product/SKU search, and low-stock reporting
 - Supplier listing, creation, editing, and input validation
