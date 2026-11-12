@@ -36,7 +36,7 @@ def supplier_logged_in_client(supplier_app, supplier_client):
         user = User(
             username="supplier_tester",
             password_hash=generate_password_hash("test-password"),
-            role="Store Staff",
+            role="Administrator",
             is_active=True,
         )
         db.session.add(user)
@@ -48,6 +48,25 @@ def supplier_logged_in_client(supplier_app, supplier_client):
         session["_fresh"] = True
 
     return supplier_client
+
+
+def test_store_staff_cannot_manage_suppliers(supplier_app, supplier_client):
+    with supplier_app.app_context():
+        user = User(
+            username="supplier_staff",
+            password_hash=generate_password_hash("test-password"),
+            role="Store Staff",
+            is_active=True,
+        )
+        db.session.add(user)
+        db.session.commit()
+        user_id = user.user_id
+
+    with supplier_client.session_transaction() as session:
+        session["_user_id"] = str(user_id)
+        session["_fresh"] = True
+
+    assert supplier_client.get("/suppliers/add").status_code == 403
 
 
 def test_supplier_creation_success(supplier_app, supplier_logged_in_client):
