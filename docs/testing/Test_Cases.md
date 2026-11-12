@@ -110,11 +110,17 @@ Each test case contains an identifier, related requirement, objective, precondit
 | Test Case ID | Requirement | Objective | Input / Condition | Expected Result |
 |---|---|---|---|---|
 | TC-Sec-02 | ESIMS-SR-001 | Verify authentication enforcement | Unauthenticated user attempts to access a protected page | Access is denied or the user is redirected to login. |
-| TC-Sec-03 | ESIMS-SR-002 | Verify role restrictions | Store Staff attempts a restricted administrative operation | Unauthorized operation is denied. |
+| TC-Sec-03 | ESIMS-SR-002 | Verify role restrictions | Store Staff attempts product or supplier management; Administrator attempts the same operations | Store Staff receives HTTP 403 for restricted operations; Administrator access is allowed. |
 | TC-Sec-04 | ESIMS-SR-003 | Verify password hashing | Inspect stored user credentials | Passwords are stored as hashes rather than plaintext. |
 | TC-Sec-05 | ESIMS-SR-004 | Verify input validation | Malformed or invalid form data | Invalid input is safely rejected with suitable validation feedback. |
 | TC-Sec-06 | ESIMS-SR-005 | Verify transaction protection | Unauthorized update or delete attempt | Operation is rejected and existing records remain unchanged. |
 | TC-Sec-07 | ESIMS-SR-004 | Verify server-side sale total integrity | Sale request containing a client-modified unit price or total | Server recalculates the total using stored product prices and does not persist the tampered value. |
+
+Role-based authorization is implemented with two roles: **Administrator** and
+**Store Staff**. Administrators may manage products and suppliers. Store Staff
+may view products and suppliers and perform inventory, purchase, sales and
+reporting operations, but cannot create, edit or deactivate products or add or
+edit suppliers.
 
 ### 3.10 User Interface and Integration Testing
 

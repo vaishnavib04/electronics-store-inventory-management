@@ -42,6 +42,7 @@
 | Test Case ID | Requirement ID | Test Description | Expected Result | Actual Result | Status |
 |---|---|---|---|---|---|
 | TC-Sec-01 | ESIMS-SR-001 | Attempt to access protected application pages without authentication. | Unauthenticated users should not be allowed to access protected pages. | Existing authentication and access-control tests passed. | Passed |
+| TC-Sec-04 | ESIMS-SR-002 | Attempt product and supplier management as Store Staff and Administrator. | Store Staff should be denied restricted management operations; Administrators should be allowed. | Automated role-authorization tests passed for restricted product and supplier routes. | Passed |
 | TC-Sec-02 | ESIMS-SR-004 | Submit invalid or incomplete data through application forms. | Invalid input should be rejected through appropriate validation. | Existing form and input-validation tests passed. | Passed |
 | TC-Sec-03 | ESIMS-SR-005 | Submit invalid purchase data and verify that it is handled safely. | Invalid purchase operations should be rejected without unintended successful updates. | Existing invalid-purchase tests passed. | Passed |
 
@@ -66,12 +67,12 @@ These additional checks should not be considered passed unless their execution i
 | Reliability | 3 | 3 Passed |
 | Availability | 1 | 1 Passed - Basic Check |
 | Usability | 2 | 2 Passed - Tested Flows |
-| Security | 3 | 3 Passed |
-| **Total** | **10** | **10 Passed for the stated scope** |
+| Security | 4 | 4 Passed |
+| **Total** | **11** | **11 Passed for the stated scope** |
 
 ## 8. Conclusion
 
-The defined non-functional test cases cover performance, reliability, availability, usability, and security requirements of ESIMS.
+The defined non-functional test cases cover performance, reliability, availability, usability, and security requirements of ESIMS. Security verification includes both authentication enforcement and role-based authorization for Administrator and Store Staff users.
 
 The tested performance endpoints met the response-time target of under 3 seconds. Existing automated tests supported the purchase, sales, authentication, and validation checks. Basic availability and usability checks were also completed.
 

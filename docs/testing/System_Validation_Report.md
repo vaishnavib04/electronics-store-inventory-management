@@ -68,6 +68,8 @@ The objective was to verify the integrated application's functionality through b
 | SV-38 | UI consistency | Updated interface elements were displayed consistently. | Passed |
 | SV-39 | Form validation | Invalid form inputs produced validation feedback. | Passed |
 | SV-40 | Session security | Protected pages could not be accessed after logout. | Passed |
+| SV-41 | Staff management restriction | Automated authorization checks denied Store Staff access to product and supplier management operations. | Passed |
+| SV-42 | Administrator management access | Automated authorization checks allowed Administrator access to product and supplier management operations. | Passed |
 
 ## 5. Test Data
 
@@ -86,6 +88,7 @@ The expected inventory change was verified through the purchase and sales workfl
 ## 6. Observations
 
 - Authentication and session handling worked as expected.
+- Role-based authorization checks allowed Administrator management access and denied restricted Store Staff operations.
 - Product and supplier management operations were successful.
 - Product search supported both name and SKU.
 - Inventory and low-stock information was displayed correctly.
@@ -101,7 +104,7 @@ Browser-based validation was performed for all listed test cases. Supporting scr
 
 ## 8. Conclusion
 
-The manual system validation covered 40 test cases across the major application modules. All 40 test cases were reported as passed, with no failures.
+The manual system validation covered 40 test cases across the major application modules. All 40 manual test cases were reported as passed, with no failures. Additional automated authorization tests verified the Administrator and Store Staff restrictions introduced after the manual validation period.
 
 The application successfully demonstrated its integrated functionality, including authentication, product and supplier management, inventory tracking, purchase and sales processing, stock validation and report generation.
 
