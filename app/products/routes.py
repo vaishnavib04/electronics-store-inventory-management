@@ -8,6 +8,7 @@ from sqlalchemy import func, or_
 from sqlalchemy.exc import IntegrityError
 
 from app.extensions import db
+from app.auth.permissions import role_required
 from app.models import Category, Product
 from app.products import products_bp
 
@@ -121,6 +122,7 @@ def list_products():
 
 @products_bp.route("/products/new", methods=["GET", "POST"])
 @login_required
+@role_required("Administrator")
 def create_product():
     if request.method == "POST":
         values, error = _read_product_form()
@@ -148,6 +150,7 @@ def view_product(product_id):
 
 @products_bp.route("/products/<int:product_id>/edit", methods=["GET", "POST"])
 @login_required
+@role_required("Administrator")
 def edit_product(product_id):
     product = _get_active_product(product_id)
     if request.method == "POST":
@@ -176,6 +179,7 @@ def edit_product(product_id):
 
 @products_bp.route("/products/<int:product_id>/deactivate", methods=["POST"])
 @login_required
+@role_required("Administrator")
 def deactivate_product(product_id):
     product = _get_active_product(product_id)
     product.is_active = False

@@ -5,6 +5,7 @@ from flask import render_template, request, redirect, url_for, flash
 from flask_login import login_required
 
 from app.extensions import db
+from app.auth.permissions import role_required
 from app.models import Supplier
 from app.suppliers import suppliers_bp
 
@@ -24,6 +25,7 @@ def list_suppliers():
 
 @suppliers_bp.route("/add", methods=["GET", "POST"])
 @login_required
+@role_required("Administrator")
 def add_supplier():
     if request.method == "POST":
         name = request.form.get("name", "").strip()
@@ -94,6 +96,7 @@ def add_supplier():
 
 @suppliers_bp.route("/<int:supplier_id>/edit", methods=["GET", "POST"])
 @login_required
+@role_required("Administrator")
 def edit_supplier(supplier_id):
     supplier = db.get_or_404(Supplier, supplier_id)
 

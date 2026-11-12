@@ -31,7 +31,7 @@ def logged_in_client(app):
     user = User(
         username="product_tester",
         password_hash=generate_password_hash("test-password"),
-        role="Store Staff",
+        role="Administrator",
         is_active=True,
     )
     category = Category(name="Electronics")
@@ -61,6 +61,27 @@ def test_product_pages_require_login(app):
     response = app.test_client().get("/products")
     assert response.status_code == 302
     assert "/login" in response.headers["Location"]
+
+
+def test_store_staff_cannot_manage_products(app):
+    from app.extensions import db
+    from app.models import User
+
+    user = User(
+        username="product_staff",
+        password_hash=generate_password_hash("test-password"),
+        role="Store Staff",
+        is_active=True,
+    )
+    db.session.add(user)
+    db.session.commit()
+
+    client = app.test_client()
+    with client.session_transaction() as session:
+        session["_user_id"] = str(user.user_id)
+        session["_fresh"] = True
+
+    assert client.get("/products/new").status_code == 403
 
 
 def test_create_list_view_and_edit_product(logged_in_client):
