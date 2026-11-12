@@ -1,6 +1,4 @@
-
 from flask import Blueprint
-from flask_login import current_user
 
 from app.extensions import login_manager
 

@@ -7,8 +7,8 @@ from flask_login import login_required
 from sqlalchemy import func, or_
 from sqlalchemy.exc import IntegrityError
 
-from app.extensions import db
 from app.auth.permissions import role_required
+from app.extensions import db
 from app.models import Category, Product
 from app.products import products_bp
 
@@ -133,7 +133,9 @@ def create_product():
             )
         product = Product(is_active=True)
         if _save_product(product, values, "Product added successfully."):
-            return redirect(url_for("products.view_product", product_id=product.product_id))
+            return redirect(
+                url_for("products.view_product", product_id=product.product_id)
+            )
         return _render_product_form(
             title="Add product", endpoint="products.create_product", status=400
         )
@@ -164,7 +166,9 @@ def edit_product(product_id):
                 status=400,
             )
         if _save_product(product, values, "Product updated successfully."):
-            return redirect(url_for("products.view_product", product_id=product.product_id))
+            return redirect(
+                url_for("products.view_product", product_id=product.product_id)
+            )
         return _render_product_form(
             title="Edit product",
             endpoint="products.edit_product",

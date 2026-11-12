@@ -27,7 +27,23 @@ jobs:
           python -m pip install ruff
 
       - name: Run Ruff lint
+        id: ruff_lint
         run: ruff check app tests
 
       - name: Check Ruff formatting
+        id: ruff_format
         run: ruff format --check app tests
+
+      - name: Publish quality summary
+        if: always()
+        run: |
+          {
+            echo "## Code quality"
+            echo "- Ruff lint: ${{ steps.ruff_lint.outcome }}"
+            echo "- Ruff formatting: ${{ steps.ruff_format.outcome }}"
+            if [ "${{ steps.ruff_lint.outcome }}" = "success" ] && [ "${{ steps.ruff_format.outcome }}" = "success" ]; then
+              echo "- Quality pass percentage: 100%"
+            else
+              echo "- Quality pass percentage: 0%"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

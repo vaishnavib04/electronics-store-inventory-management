@@ -17,6 +17,7 @@ Rules this module enforces:
     - Stock is reduced with reduce_stock() from the inventory module, so
       concurrent sales cannot push stock below zero.
 """
+
 from collections import OrderedDict
 from decimal import Decimal
 
@@ -122,7 +123,9 @@ def _read_sale_form():
         product = db.session.get(Product, product_id)
         if product is None or not product.is_active:
             return None, None, "Please select an active product."
-        unit_price = Decimal(product.unit_price)  # server-side price, never from the form
+        unit_price = Decimal(
+            product.unit_price
+        )  # server-side price, never from the form
         line_total = (unit_price * quantity).quantize(Decimal("0.01"))
         total += line_total
         lines.append(

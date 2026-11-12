@@ -1,11 +1,11 @@
-
 import re
 
-from flask import render_template, request, redirect, url_for, flash
+from flask import flash, redirect, render_template, request, url_for
 from flask_login import login_required
+from sqlalchemy.exc import SQLAlchemyError
 
-from app.extensions import db
 from app.auth.permissions import role_required
+from app.extensions import db
 from app.models import Supplier
 from app.suppliers import suppliers_bp
 
@@ -13,9 +13,9 @@ from app.suppliers import suppliers_bp
 @suppliers_bp.route("/")
 @login_required
 def list_suppliers():
-    suppliers = db.session.execute(
-        db.select(Supplier).order_by(Supplier.name)
-    ).scalars().all()
+    suppliers = (
+        db.session.execute(db.select(Supplier).order_by(Supplier.name)).scalars().all()
+    )
 
     return render_template(
         "suppliers/list.html",
@@ -75,7 +75,7 @@ def add_supplier():
         try:
             db.session.add(supplier)
             db.session.commit()
-        except Exception:
+        except SQLAlchemyError:
             db.session.rollback()
             flash("Unable to save the supplier. Please try again.", "error")
             return render_template(
@@ -145,7 +145,7 @@ def edit_supplier(supplier_id):
 
         try:
             db.session.commit()
-        except Exception:
+        except SQLAlchemyError:
             db.session.rollback()
             flash("Unable to update the supplier. Please try again.", "error")
             return render_template(

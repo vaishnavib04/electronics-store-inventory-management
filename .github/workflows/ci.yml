@@ -65,6 +65,47 @@ jobs:
             --cov-report=xml:reports/backend-coverage.xml \
             --cov-report=html:reports/backend-coverage-html
 
+      - name: Publish backend test summary
+        if: always()
+        run: |
+          python - <<'PY'
+          import os
+          import xml.etree.ElementTree as ElementTree
+          from pathlib import Path
+
+          report_path = Path("reports/backend-junit.xml")
+          summary_path = Path(os.environ["GITHUB_STEP_SUMMARY"])
+
+          if report_path.exists():
+              root = ElementTree.parse(report_path).getroot()
+              suites = root.findall(".//testsuite")
+              total = sum(int(suite.attrib.get("tests", 0)) for suite in suites)
+              failures = sum(int(suite.attrib.get("failures", 0)) for suite in suites)
+              errors = sum(int(suite.attrib.get("errors", 0)) for suite in suites)
+              skipped = sum(int(suite.attrib.get("skipped", 0)) for suite in suites)
+              passed = total - failures - errors - skipped
+          else:
+              total = passed = failures = errors = skipped = "unavailable"
+
+          coverage_path = Path("reports/backend-coverage.xml")
+          coverage = "unavailable"
+          if coverage_path.exists():
+              coverage_root = ElementTree.parse(coverage_path).getroot()
+              coverage = f"{float(coverage_root.attrib['line-rate']) * 100:.2f}%"
+
+          summary_path.write_text(
+              "## Backend test report\n\n"
+              f"| Metric | Result |\n|---|---:|\n"
+              f"| Total tests | {total} |\n"
+              f"| Passed | {passed} |\n"
+              f"| Failed | {failures} |\n"
+              f"| Errors | {errors} |\n"
+              f"| Skipped | {skipped} |\n"
+              f"| Line coverage | {coverage} |\n",
+              encoding="utf-8",
+          )
+          PY
+
       - name: Upload backend reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -92,6 +133,7 @@ jobs:
           python -m pip install -r requirements.txt
 
       - name: Validate templates and stylesheets
+        id: frontend_validation
         run: |
           python - <<'PY'
           from pathlib import Path
@@ -122,6 +164,14 @@ jobs:
               encoding="utf-8",
           )
           PY
+
+      - name: Publish frontend test summary
+        if: always()
+        run: |
+          {
+            echo "## Frontend validation"
+            echo "- Jinja templates and CSS validation: ${{ steps.frontend_validation.outcome }}"
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload frontend report
         if: always()

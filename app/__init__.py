@@ -1,10 +1,9 @@
-
 import os
 
-from flask import Flask
 from dotenv import load_dotenv
+from flask import Flask
 
-from app.extensions import db, login_manager, csrf
+from app.extensions import csrf, db, login_manager
 
 load_dotenv()
 
@@ -17,14 +16,10 @@ def create_app():
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
     if not app.config["SECRET_KEY"]:
-        raise RuntimeError(
-            "SECRET_KEY is missing. Configure it in your .env file."
-        )
+        raise RuntimeError("SECRET_KEY is missing. Configure it in your .env file.")
 
     if not app.config["SQLALCHEMY_DATABASE_URI"]:
-        raise RuntimeError(
-            "DATABASE_URL is missing. Configure it in your .env file."
-        )
+        raise RuntimeError("DATABASE_URL is missing. Configure it in your .env file.")
 
     db.init_app(app)
     login_manager.init_app(app)
@@ -34,18 +29,20 @@ def create_app():
     login_manager.login_message = "Please log in to access this page."
 
     from app import models  # noqa: F401
-    from app.auth import auth_bp
-    from app.auth import routes  # noqa: F401
+    from app.auth import (
+        auth_bp,
+        routes,  # noqa: F401
+    )
+    from app.inventory.routes import inventory_bp
     from app.products import products_bp
     from app.products import routes as product_routes  # noqa: F401
-    from app.suppliers import suppliers_bp
-    from app.inventory.routes import inventory_bp
-    from app.reports import reports_bp
-    from app.reports import routes as report_routes  # noqa: F401
     from app.purchases import purchases_bp
     from app.purchases import routes as purchase_routes  # noqa: F401
-    from app.sales import sales_bp
+    from app.reports import reports_bp
+    from app.reports import routes as report_routes  # noqa: F401
     from app.sales import routes as sales_routes  # noqa: F401
+    from app.sales import sales_bp
+    from app.suppliers import suppliers_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(products_bp)
@@ -56,4 +53,3 @@ def create_app():
     app.register_blueprint(sales_bp)
 
     return app
-

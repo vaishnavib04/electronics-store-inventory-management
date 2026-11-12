@@ -30,4 +30,13 @@ jobs:
           python -m pip install pip-audit
 
       - name: Audit Python dependencies
+        id: dependency_audit
         run: python -m pip_audit -r requirements.txt
+
+      - name: Publish security summary
+        if: always()
+        run: |
+          {
+            echo "## Security checks"
+            echo "- pip-audit: ${{ steps.dependency_audit.outcome }}"
+          } >> "$GITHUB_STEP_SUMMARY"

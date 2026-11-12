@@ -1,16 +1,31 @@
-
 from sqlalchemy import CheckConstraint
 
 from app.models import (
-    User, Category, Product, Inventory, Supplier,
-    Purchase, PurchaseItem, Sale, SaleItem, StockMovement
+    Category,
+    Inventory,
+    Product,
+    Purchase,
+    PurchaseItem,
+    Sale,
+    SaleItem,
+    StockMovement,
+    Supplier,
+    User,
 )
 
 
 def test_all_ten_models_exist():
     models = [
-        User, Category, Product, Inventory, Supplier,
-        Purchase, PurchaseItem, Sale, SaleItem, StockMovement
+        User,
+        Category,
+        Product,
+        Inventory,
+        Supplier,
+        Purchase,
+        PurchaseItem,
+        Sale,
+        SaleItem,
+        StockMovement,
     ]
     assert len(models) == 10
     assert len({model.__tablename__ for model in models}) == 10
@@ -56,8 +71,13 @@ def test_required_relationships_and_unique_fields():
 
 def test_database_check_constraints():
     constrained_models = [
-        Product, Inventory, Purchase, PurchaseItem,
-        Sale, SaleItem, StockMovement
+        Product,
+        Inventory,
+        Purchase,
+        PurchaseItem,
+        Sale,
+        SaleItem,
+        StockMovement,
     ]
 
     for model in constrained_models:
@@ -65,6 +85,8 @@ def test_database_check_constraints():
             isinstance(constraint, CheckConstraint)
             for constraint in model.__table__.constraints
         ), f"{model.__name__} is missing check constraints"
+
+
 def test_supplier_is_active_by_default():
     column = Supplier.__table__.columns["is_active"]
 
