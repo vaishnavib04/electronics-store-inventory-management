@@ -72,12 +72,12 @@ The generated JUnit XML report is available at `docs/testing/unit-test-report.xm
 
 ## 9. CI Reports
 
-The GitHub Actions pipeline is split into three workflows:
+The GitHub Actions pipeline is defined in one workflow:
 
-- `ci.yml` runs MySQL-backed backend tests, frontend template validation, and
-  report collection.
-- `quality.yml` runs Ruff lint and formatting checks.
-- `security.yml` audits Python dependencies with `pip-audit`.
+- `ci.yml` runs MySQL-backed backend tests, frontend template validation,
+  Ruff lint and formatting checks, dependency auditing with `pip-audit`, and
+  report collection. These checks run as separate jobs within the same
+  workflow and finish with a pipeline summary.
 
 After a CI workflow run completes, open the run in GitHub and download the
 `esims-test-reports` artifact. It contains:

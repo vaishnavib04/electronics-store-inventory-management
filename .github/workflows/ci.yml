@@ -1,9 +1,12 @@
-name: ESIMS Continuous Integration
+name: ESIMS CI/CD Pipeline
 
 on:
   push:
   pull_request:
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
@@ -181,6 +184,80 @@ jobs:
           path: frontend-test-report.md
           if-no-files-found: warn
 
+  quality:
+    name: Code quality
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.15"
+          cache: pip
+
+      - name: Install project and quality dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install ruff
+
+      - name: Run Ruff lint
+        id: ruff_lint
+        run: ruff check app tests
+
+      - name: Check Ruff formatting
+        id: ruff_format
+        run: ruff format --check app tests
+
+      - name: Publish quality summary
+        if: always()
+        run: |
+          {
+            echo "## Code quality"
+            echo "- Ruff lint: ${{ steps.ruff_lint.outcome }}"
+            echo "- Ruff formatting: ${{ steps.ruff_format.outcome }}"
+            if [ "${{ steps.ruff_lint.outcome }}" = "success" ] && [ "${{ steps.ruff_format.outcome }}" = "success" ]; then
+              echo "- Quality pass percentage: 100%"
+            else
+              echo "- Quality pass percentage: 0%"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  dependency-audit:
+    name: Security checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.15"
+          cache: pip
+
+      - name: Install dependencies and pip-audit
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install pip-audit
+
+      - name: Audit Python dependencies
+        id: dependency_audit
+        run: python -m pip_audit -r requirements.txt
+
+      - name: Publish security summary
+        if: always()
+        run: |
+          {
+            echo "## Security checks"
+            echo "- pip-audit: ${{ steps.dependency_audit.outcome }}"
+          } >> "$GITHUB_STEP_SUMMARY"
+
   reports:
     name: Collect test reports
     if: always()
@@ -208,3 +285,29 @@ jobs:
           name: esims-test-reports
           path: reports/
           if-no-files-found: warn
+
+  pipeline-summary:
+    name: Pipeline summary
+    if: always()
+    needs:
+      - backend
+      - frontend
+      - quality
+      - dependency-audit
+      - reports
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Publish pipeline summary
+        run: |
+          {
+            echo "## ESIMS CI/CD Pipeline"
+            echo ""
+            echo "| Check | Result |"
+            echo "|---|---|"
+            echo "| Backend tests | ${{ needs.backend.result }} |"
+            echo "| Frontend validation | ${{ needs.frontend.result }} |"
+            echo "| Code quality | ${{ needs.quality.result }} |"
+            echo "| Security checks | ${{ needs.dependency-audit.result }} |"
+            echo "| Test reports | ${{ needs.reports.result }} |"
+          } >> "$GITHUB_STEP_SUMMARY"
