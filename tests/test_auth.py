@@ -50,6 +50,9 @@ def test_authenticated_login_submission_validates_new_credentials(auth_app):
 def test_auth_pages_are_not_cached(auth_app):
     response = auth_app.test_client().get("/login")
 
-    assert response.headers["Cache-Control"] == "no-store, no-cache, must-revalidate, max-age=0"
+    assert (
+        response.headers["Cache-Control"]
+        == "no-store, no-cache, must-revalidate, max-age=0"
+    )
     assert response.headers["Pragma"] == "no-cache"
     assert response.headers["Expires"] == "0"

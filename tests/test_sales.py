@@ -3,6 +3,7 @@
 Self-contained: builds its own test app on an in-memory SQLite database with
 its own fixtures, so it never depends on or clashes with other test files.
 """
+
 from decimal import Decimal
 
 import pytest
@@ -29,8 +30,10 @@ def app(monkeypatch):
     monkeypatch.setenv("SECRET_KEY", "test-secret-key")
     monkeypatch.setenv("DATABASE_URL", "sqlite:///:memory:")
     from app import create_app
-    from app.sales import routes  # noqa: F401  (attaches routes to sales_bp)
-    from app.sales import sales_bp
+    from app.sales import (
+        routes,  # noqa: F401  (attaches routes to sales_bp)
+        sales_bp,
+    )
 
     application = create_app()
     application.config.update(TESTING=True, WTF_CSRF_ENABLED=False)
@@ -58,27 +61,57 @@ def data(app):
     - Old TV: price 500.00,  5 in stock, but deactivated
     - Charger (no inventory row at all)
     """
-    user = User(username="sales_tester", password_hash=generate_password_hash("x"),
-                role="Store Staff", is_active=True)
+    user = User(
+        username="sales_tester",
+        password_hash=generate_password_hash("x"),
+        role="Store Staff",
+        is_active=True,
+    )
     cat = Category(name="Sales Test")
     db.session.add_all([user, cat])
     db.session.flush()
 
-    phone = Product(sku="S-PHONE", name="Phone", category_id=cat.category_id,
-                    unit_price=Decimal("100.00"), reorder_level=2, is_active=True)
-    cable = Product(sku="S-CABLE", name="Cable", category_id=cat.category_id,
-                    unit_price=Decimal("15.50"), reorder_level=2, is_active=True)
-    old_tv = Product(sku="S-TV", name="Old TV", category_id=cat.category_id,
-                     unit_price=Decimal("500.00"), reorder_level=0, is_active=False)
-    charger = Product(sku="S-CHG", name="Charger", category_id=cat.category_id,
-                      unit_price=Decimal("20.00"), reorder_level=0, is_active=True)
+    phone = Product(
+        sku="S-PHONE",
+        name="Phone",
+        category_id=cat.category_id,
+        unit_price=Decimal("100.00"),
+        reorder_level=2,
+        is_active=True,
+    )
+    cable = Product(
+        sku="S-CABLE",
+        name="Cable",
+        category_id=cat.category_id,
+        unit_price=Decimal("15.50"),
+        reorder_level=2,
+        is_active=True,
+    )
+    old_tv = Product(
+        sku="S-TV",
+        name="Old TV",
+        category_id=cat.category_id,
+        unit_price=Decimal("500.00"),
+        reorder_level=0,
+        is_active=False,
+    )
+    charger = Product(
+        sku="S-CHG",
+        name="Charger",
+        category_id=cat.category_id,
+        unit_price=Decimal("20.00"),
+        reorder_level=0,
+        is_active=True,
+    )
     db.session.add_all([phone, cable, old_tv, charger])
     db.session.flush()
-    db.session.add_all([
-        Inventory(product_id=phone.product_id, quantity_on_hand=10),
-        Inventory(product_id=cable.product_id, quantity_on_hand=3),
-        Inventory(product_id=old_tv.product_id, quantity_on_hand=5),
-    ])
+    db.session.add_all(
+        [
+            Inventory(product_id=phone.product_id, quantity_on_hand=10),
+            Inventory(product_id=cable.product_id, quantity_on_hand=3),
+            Inventory(product_id=old_tv.product_id, quantity_on_hand=5),
+        ]
+    )
     db.session.commit()
     return {
         "user_id": user.user_id,
@@ -98,8 +131,11 @@ def logged_in(client, data):
 
 
 def _stock(product_id):
-    return db.session.query(Inventory.quantity_on_hand).filter_by(
-        product_id=product_id).scalar()
+    return (
+        db.session.query(Inventory.quantity_on_hand)
+        .filter_by(product_id=product_id)
+        .scalar()
+    )
 
 
 def _counts():
@@ -134,8 +170,12 @@ def test_sales_pages_require_login(client, path):
 def test_both_roles_can_use_all_sales_pages(app, client, data, role):
     """SRS 2.3: Store Staff record sales; Store Manager/Administrator has access
     to all functions. So both roles must be able to list, create and view sales."""
-    user = User(username=f"role_{role.replace(' ', '_')}",
-                password_hash=generate_password_hash("x"), role=role, is_active=True)
+    user = User(
+        username=f"role_{role.replace(' ', '_')}",
+        password_hash=generate_password_hash("x"),
+        role=role,
+        is_active=True,
+    )
     db.session.add(user)
     db.session.commit()
     with client.session_transaction() as sess:
@@ -211,8 +251,13 @@ def test_multi_item_sale_total_is_calculated_on_server(logged_in, data):
 
 
 def test_browser_submitted_price_and_total_are_ignored(logged_in, data):
-    _sell(logged_in, (data["phone"], 1),
-          unit_price="0.01", total_amount="1.00", total="1.00")
+    _sell(
+        logged_in,
+        (data["phone"], 1),
+        unit_price="0.01",
+        total_amount="1.00",
+        total="1.00",
+    )
     sale = db.session.query(Sale).one()
     item = db.session.query(SaleItem).one()
     assert sale.total_amount == Decimal("100.00")
@@ -334,6 +379,7 @@ def test_concurrent_sale_cannot_make_stock_negative(logged_in, data, monkeypatch
     rejected, nothing saved, and stock must never go below zero.
     """
     from sqlalchemy import update
+
     import app.sales.routes as sales_routes
 
     real_reduce = sales_routes.reduce_stock
@@ -389,7 +435,7 @@ def test_view_sale_shows_items_and_total(logged_in, data):
     resp = logged_in.get(f"/sales/{sale_id}")
     assert resp.status_code == 200
     assert b"Phone" in resp.data and b"Cable" in resp.data
-    assert b"31.00" in resp.data   # cable line total 2 x 15.50
+    assert b"31.00" in resp.data  # cable line total 2 x 15.50
     assert b"131.00" in resp.data  # sale total
 
 

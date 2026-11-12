@@ -1,0 +1,49 @@
+name: ESIMS Code Quality
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  quality:
+    name: Ruff lint and format checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.15"
+          cache: pip
+
+      - name: Install project and quality dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install ruff
+
+      - name: Run Ruff lint
+        id: ruff_lint
+        run: ruff check app tests
+
+      - name: Check Ruff formatting
+        id: ruff_format
+        run: ruff format --check app tests
+
+      - name: Publish quality summary
+        if: always()
+        run: |
+          {
+            echo "## Code quality"
+            echo "- Ruff lint: ${{ steps.ruff_lint.outcome }}"
+            echo "- Ruff formatting: ${{ steps.ruff_format.outcome }}"
+            if [ "${{ steps.ruff_lint.outcome }}" = "success" ] && [ "${{ steps.ruff_format.outcome }}" = "success" ]; then
+              echo "- Quality pass percentage: 100%"
+            else
+              echo "- Quality pass percentage: 0%"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

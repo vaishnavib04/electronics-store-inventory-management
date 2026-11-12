@@ -3,5 +3,6 @@ Flask-SQLAlchemy
 PyMySQL
 python-dotenv
 pytest
+pytest-cov
 Flask-Login
 Flask-WTF

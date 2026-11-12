@@ -7,6 +7,7 @@ depends on or clashes with anyone else's tests/conftest.py.
 Part 1 tests the validation helpers (no database).
 Part 2 tests the pages and the stock-reduction function.
 """
+
 import pytest
 
 from app.inventory.routes import (
@@ -18,8 +19,8 @@ from app.inventory.routes import (
     validate_stock_level,
 )
 
-
 # ---------- Part 1: validation (no database needed) ----------
+
 
 @pytest.mark.parametrize("raw, expected", [("5", 5), (" 12 ", 12), (3, 3)])
 def test_parse_quantity_accepts_positive_whole_numbers(raw, expected):
@@ -72,6 +73,7 @@ def test_is_low_stock_threshold(qty, reorder, expected):
 
 # ---------- Part 2: pages and database (own fixtures, no shared conftest) ----------
 
+
 @pytest.fixture
 def app(monkeypatch):
     monkeypatch.setenv("SECRET_KEY", "test-secret-key")
@@ -101,12 +103,17 @@ def client(app):
 @pytest.fixture
 def logged_in_client(app, client):
     """Logs in through Flask-Login's session key, as Member 1's auth does."""
-    from app.extensions import db
-    from app.models import User
     from werkzeug.security import generate_password_hash
 
-    user = User(username="inv_tester", password_hash=generate_password_hash("x"),
-                role="Store Staff", is_active=True)
+    from app.extensions import db
+    from app.models import User
+
+    user = User(
+        username="inv_tester",
+        password_hash=generate_password_hash("x"),
+        role="Store Staff",
+        is_active=True,
+    )
     db.session.add(user)
     db.session.commit()
     with client.session_transaction() as sess:
@@ -121,31 +128,56 @@ def _seed(db):
     cat = Category(name="Phones")
     db.session.add(cat)
     db.session.flush()
-    plenty = Product(sku="SKU-OK", name="Plenty Phone", category_id=cat.category_id,
-                     unit_price=100, reorder_level=5, is_active=True)
-    low = Product(sku="SKU-LOW", name="Scarce Phone", category_id=cat.category_id,
-                  unit_price=100, reorder_level=5, is_active=True)
-    gone = Product(sku="SKU-OFF", name="Retired Phone", category_id=cat.category_id,
-                   unit_price=100, reorder_level=5, is_active=False)
+    plenty = Product(
+        sku="SKU-OK",
+        name="Plenty Phone",
+        category_id=cat.category_id,
+        unit_price=100,
+        reorder_level=5,
+        is_active=True,
+    )
+    low = Product(
+        sku="SKU-LOW",
+        name="Scarce Phone",
+        category_id=cat.category_id,
+        unit_price=100,
+        reorder_level=5,
+        is_active=True,
+    )
+    gone = Product(
+        sku="SKU-OFF",
+        name="Retired Phone",
+        category_id=cat.category_id,
+        unit_price=100,
+        reorder_level=5,
+        is_active=False,
+    )
     db.session.add_all([plenty, low, gone])
     db.session.flush()
-    db.session.add_all([
-        Inventory(product_id=plenty.product_id, quantity_on_hand=50),
-        Inventory(product_id=low.product_id, quantity_on_hand=2),
-        Inventory(product_id=gone.product_id, quantity_on_hand=0),
-    ])
+    db.session.add_all(
+        [
+            Inventory(product_id=plenty.product_id, quantity_on_hand=50),
+            Inventory(product_id=low.product_id, quantity_on_hand=2),
+            Inventory(product_id=gone.product_id, quantity_on_hand=0),
+        ]
+    )
     db.session.commit()
 
 
 def _qty(db, sku):
     from app.models import Inventory, Product
-    return (db.session.query(Inventory.quantity_on_hand)
-            .join(Product, Product.product_id == Inventory.product_id)
-            .filter(Product.sku == sku).scalar())
+
+    return (
+        db.session.query(Inventory.quantity_on_hand)
+        .join(Product, Product.product_id == Inventory.product_id)
+        .filter(Product.sku == sku)
+        .scalar()
+    )
 
 
 def _pid(db, sku):
     from app.models import Product
+
     return db.session.query(Product.product_id).filter(Product.sku == sku).scalar()
 
 
@@ -161,6 +193,7 @@ def test_low_stock_requires_login(client):
 
 def test_inventory_lists_active_products_with_stock(app, logged_in_client):
     from app.extensions import db
+
     _seed(db)
     resp = logged_in_client.get("/inventory")
     assert resp.status_code == 200
@@ -171,6 +204,7 @@ def test_inventory_lists_active_products_with_stock(app, logged_in_client):
 
 def test_inventory_search_by_name(app, logged_in_client):
     from app.extensions import db
+
     _seed(db)
     resp = logged_in_client.get("/inventory?q=scarce")
     assert b"Scarce Phone" in resp.data
@@ -179,6 +213,7 @@ def test_inventory_search_by_name(app, logged_in_client):
 
 def test_inventory_search_by_sku(app, logged_in_client):
     from app.extensions import db
+
     _seed(db)
     resp = logged_in_client.get("/inventory?q=SKU-OK")
     assert b"Plenty Phone" in resp.data
@@ -187,6 +222,7 @@ def test_inventory_search_by_sku(app, logged_in_client):
 
 def test_low_stock_shows_only_low_items(app, logged_in_client):
     from app.extensions import db
+
     _seed(db)
     resp = logged_in_client.get("/inventory/low-stock")
     assert resp.status_code == 200
@@ -197,6 +233,7 @@ def test_low_stock_shows_only_low_items(app, logged_in_client):
 
 def test_reduce_stock_subtracts(app):
     from app.extensions import db
+
     _seed(db)
     reduce_stock(_pid(db, "SKU-OK"), 20)
     db.session.commit()
@@ -205,6 +242,7 @@ def test_reduce_stock_subtracts(app):
 
 def test_reduce_stock_to_exactly_zero(app):
     from app.extensions import db
+
     _seed(db)
     reduce_stock(_pid(db, "SKU-LOW"), 2)
     db.session.commit()
@@ -213,6 +251,7 @@ def test_reduce_stock_to_exactly_zero(app):
 
 def test_reduce_stock_rejects_going_negative_and_changes_nothing(app):
     from app.extensions import db
+
     _seed(db)
     with pytest.raises(StockValidationError, match="Insufficient stock"):
         reduce_stock(_pid(db, "SKU-LOW"), 3)
@@ -223,6 +262,7 @@ def test_reduce_stock_rejects_going_negative_and_changes_nothing(app):
 @pytest.mark.parametrize("bad", [0, -1, 1.5, "2", True])
 def test_reduce_stock_rejects_invalid_quantity(app, bad):
     from app.extensions import db
+
     _seed(db)
     with pytest.raises(StockValidationError):
         reduce_stock(_pid(db, "SKU-OK"), bad)
@@ -232,12 +272,13 @@ def test_reduce_stock_ignores_stale_reads(app):
     """Two sales both saw 2 in stock and each try to sell 2.
     Only the first may succeed; stock must never go below 0."""
     from app.extensions import db
+
     _seed(db)
     pid = _pid(db, "SKU-LOW")
-    assert _qty(db, "SKU-LOW") == 2   # both "sales" read 2
-    reduce_stock(pid, 2)              # first sale succeeds
+    assert _qty(db, "SKU-LOW") == 2  # both "sales" read 2
+    reduce_stock(pid, 2)  # first sale succeeds
     db.session.commit()
     with pytest.raises(StockValidationError):
-        reduce_stock(pid, 2)          # second sale's stale check is not trusted
+        reduce_stock(pid, 2)  # second sale's stale check is not trusted
     db.session.rollback()
     assert _qty(db, "SKU-LOW") == 0

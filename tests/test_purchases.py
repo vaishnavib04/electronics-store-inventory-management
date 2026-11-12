@@ -1,4 +1,3 @@
-
 from decimal import Decimal
 
 import pytest
@@ -114,13 +113,9 @@ def test_purchase_creation_updates_inventory_and_records_movement(
     assert b"Purchase recorded successfully." in response.data
 
     with purchase_app.app_context():
-        purchase = db.session.execute(
-            db.select(Purchase)
-        ).scalar_one()
+        purchase = db.session.execute(db.select(Purchase)).scalar_one()
 
-        item = db.session.execute(
-            db.select(PurchaseItem)
-        ).scalar_one()
+        item = db.session.execute(db.select(PurchaseItem)).scalar_one()
 
         inventory = db.session.execute(
             db.select(Inventory).where(
@@ -128,9 +123,7 @@ def test_purchase_creation_updates_inventory_and_records_movement(
             )
         ).scalar_one()
 
-        movement = db.session.execute(
-            db.select(StockMovement)
-        ).scalar_one()
+        movement = db.session.execute(db.select(StockMovement)).scalar_one()
 
         assert purchase.supplier_id == purchase_setup["supplier_id"]
         assert purchase.user_id == purchase_setup["user_id"]
@@ -148,9 +141,7 @@ def test_purchase_creation_updates_inventory_and_records_movement(
         assert movement.user_id == purchase_setup["user_id"]
 
 
-def test_purchase_adds_to_existing_inventory(
-    purchase_app, purchase_setup
-):
+def test_purchase_adds_to_existing_inventory(purchase_app, purchase_setup):
     with purchase_app.app_context():
         inventory = Inventory(
             product_id=purchase_setup["product_id"],
@@ -209,18 +200,10 @@ def test_invalid_purchase_does_not_change_database(
     assert response.status_code == 400
 
     with purchase_app.app_context():
-        assert db.session.execute(
-            db.select(Purchase)
-        ).scalars().all() == []
+        assert db.session.execute(db.select(Purchase)).scalars().all() == []
 
-        assert db.session.execute(
-            db.select(PurchaseItem)
-        ).scalars().all() == []
+        assert db.session.execute(db.select(PurchaseItem)).scalars().all() == []
 
-        assert db.session.execute(
-            db.select(StockMovement)
-        ).scalars().all() == []
+        assert db.session.execute(db.select(StockMovement)).scalars().all() == []
 
-        assert db.session.execute(
-            db.select(Inventory)
-        ).scalars().all() == []
+        assert db.session.execute(db.select(Inventory)).scalars().all() == []

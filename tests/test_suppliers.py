@@ -1,4 +1,3 @@
-
 import pytest
 from werkzeug.security import generate_password_hash
 
@@ -85,9 +84,7 @@ def test_supplier_creation_success(supplier_app, supplier_logged_in_client):
 
     with supplier_app.app_context():
         supplier = db.session.execute(
-            db.select(Supplier).where(
-                Supplier.name == "Test Electronics Supplier"
-            )
+            db.select(Supplier).where(Supplier.name == "Test Electronics Supplier")
         ).scalar_one()
 
         assert supplier.contact_person == "Test Contact"
@@ -145,9 +142,7 @@ def test_supplier_creation_rejects_missing_name(
     assert response.status_code == 400
 
     with supplier_app.app_context():
-        assert db.session.execute(
-            db.select(Supplier)
-        ).scalars().all() == []
+        assert db.session.execute(db.select(Supplier)).scalars().all() == []
 
 
 @pytest.mark.parametrize(
@@ -175,9 +170,7 @@ def test_supplier_creation_rejects_invalid_phone_or_email(
     assert response.status_code == 400
 
     with supplier_app.app_context():
-        assert db.session.execute(
-            db.select(Supplier)
-        ).scalars().all() == []
+        assert db.session.execute(db.select(Supplier)).scalars().all() == []
 
 
 @pytest.mark.parametrize(

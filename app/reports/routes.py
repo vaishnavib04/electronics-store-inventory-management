@@ -9,6 +9,7 @@ All figures are read from the database at request time; nothing is hardcoded.
 The inventory report reuses get_inventory_rows() from the inventory module,
 so /inventory and the report always agree on stock levels.
 """
+
 from collections import OrderedDict
 from datetime import date, datetime, time, timedelta
 from decimal import Decimal
@@ -37,11 +38,13 @@ def build_inventory_report():
     """Every active product with stock, stock value and low-stock flag, plus totals."""
     rows = get_inventory_rows()
     for row in rows:
-        row["stock_value"] = _money(Decimal(row["unit_price"]) * row["quantity_on_hand"])
+        row["stock_value"] = _money(
+            Decimal(row["unit_price"]) * row["quantity_on_hand"]
+        )
     summary = {
         "product_count": len(rows),
         "total_units": sum(r["quantity_on_hand"] for r in rows),
-        "total_value": _money(sum((r["stock_value"] for r in rows), Decimal("0"))),
+        "total_value": _money(sum((r["stock_value"] for r in rows), Decimal(0))),
         "low_stock_count": sum(1 for r in rows if r["is_low"]),
         "out_of_stock_count": sum(1 for r in rows if r["quantity_on_hand"] == 0),
     }
@@ -94,14 +97,14 @@ def build_sales_report(start=None, end=None):
 
     by_product = {}
     by_day = OrderedDict()
-    total_revenue = Decimal("0")
+    total_revenue = Decimal(0)
     total_units = 0
 
     for sale in sales:
         total_revenue += Decimal(sale.total_amount)
         day = sale.sale_datetime.date()
         day_row = by_day.setdefault(
-            day, {"date": day, "sale_count": 0, "units": 0, "revenue": Decimal("0")}
+            day, {"date": day, "sale_count": 0, "units": 0, "revenue": Decimal(0)}
         )
         day_row["sale_count"] += 1
         day_row["revenue"] += Decimal(sale.total_amount)
@@ -116,7 +119,7 @@ def build_sales_report(start=None, end=None):
                     "sku": item.product.sku,
                     "name": item.product.name,
                     "units": 0,
-                    "revenue": Decimal("0"),
+                    "revenue": Decimal(0),
                 },
             )
             prod["units"] += item.quantity

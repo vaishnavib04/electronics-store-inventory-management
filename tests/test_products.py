@@ -1,6 +1,5 @@
 """Tests for Member 2's product management and Sprint 2 UI/module integration (UI-001)."""
 
-from decimal import Decimal
 import re
 
 import pytest
@@ -120,7 +119,10 @@ def test_create_list_view_and_edit_product(logged_in_client):
         ({"unit_price": "1.239"}, "Unit price can have at most two decimal places."),
         ({"unit_price": "100000000.00"}, "Unit price is too large."),
         ({"reorder_level": "-1"}, "Reorder level must be a whole number of 0 or more."),
-        ({"reorder_level": "1.5"}, "Reorder level must be a whole number of 0 or more."),
+        (
+            {"reorder_level": "1.5"},
+            "Reorder level must be a whole number of 0 or more.",
+        ),
         ({"category_id": "999"}, "Please select a valid category."),
         ({"category_id": "abc"}, "Please select a valid category."),
     ],
@@ -174,7 +176,9 @@ def test_deactivated_product_routes_return_404(logged_in_client):
     assert client.post("/products/1/deactivate").status_code == 404
 
 
-def test_product_inventory_integration_across_purchases_and_sales(logged_in_client, app):
+def test_product_inventory_integration_across_purchases_and_sales(
+    logged_in_client, app
+):
     """Verify product quantities display accurately across product detail,
     inventory listing, and low-stock pages after purchase and sale transactions."""
     from app.extensions import db
@@ -190,7 +194,13 @@ def test_product_inventory_integration_across_purchases_and_sales(logged_in_clie
     # 1. Create product with reorder_level = 5 (initially 0 in stock -> low stock)
     resp = client.post(
         "/products/new",
-        data=_form(category_id, name="USB-C Hub", sku="HUB-100", unit_price="40.00", reorder_level="5"),
+        data=_form(
+            category_id,
+            name="USB-C Hub",
+            sku="HUB-100",
+            unit_price="40.00",
+            reorder_level="5",
+        ),
     )
     assert resp.status_code == 302
 
@@ -215,7 +225,10 @@ def test_product_inventory_integration_across_purchases_and_sales(logged_in_clie
     assert b"Purchase recorded successfully." in purchase_resp.data
 
     detail_after_purchase = client.get("/products/1")
-    assert b"Quantity on hand</dt><dd class=\"col-sm-9\">10</dd>" in detail_after_purchase.data
+    assert (
+        b'Quantity on hand</dt><dd class="col-sm-9">10</dd>'
+        in detail_after_purchase.data
+    )
     assert b"USB-C Hub" not in client.get("/inventory/low-stock").data
 
     # 3. Record a sale of 7 units -> stock becomes 3 (<= reorder_level 5 -> Low stock again)
@@ -228,7 +241,7 @@ def test_product_inventory_integration_across_purchases_and_sales(logged_in_clie
     assert b"recorded successfully" in sale_resp.data
 
     detail_after_sale = client.get("/products/1")
-    assert b"Quantity on hand</dt><dd class=\"col-sm-9\">3</dd>" in detail_after_sale.data
+    assert b'Quantity on hand</dt><dd class="col-sm-9">3</dd>' in detail_after_sale.data
     assert b"USB-C Hub" in client.get("/inventory/low-stock").data
 
 
@@ -247,7 +260,9 @@ def test_inactive_product_handled_consistently_across_modules(logged_in_client, 
 
     client.post(
         "/products/new",
-        data=_form(category_id, name="Legacy Monitor", sku="MON-OLD", reorder_level="5"),
+        data=_form(
+            category_id, name="Legacy Monitor", sku="MON-OLD", reorder_level="5"
+        ),
     )
     with app.app_context():
         db.session.add(Inventory(product_id=1, quantity_on_hand=2))
@@ -345,7 +360,9 @@ def test_purchase_workflow_ui_empty_state_validation_and_success(logged_in_clien
 
     client.post(
         "/products/new",
-        data=_form(category_id, name="Mechanical Keyboard", sku="KEY-101", unit_price="75.00"),
+        data=_form(
+            category_id, name="Mechanical Keyboard", sku="KEY-101", unit_price="75.00"
+        ),
     )
 
     # 1. Empty state on purchase list
@@ -491,7 +508,12 @@ def test_sales_workflow_ui_empty_state_validation_and_success(logged_in_client, 
     # 2. Add product with stock and verify sale form
     client.post(
         "/products/new",
-        data=_form(category_id, name="Noise-Cancelling Headphones", sku="ANC-200", unit_price="150.00"),
+        data=_form(
+            category_id,
+            name="Noise-Cancelling Headphones",
+            sku="ANC-200",
+            unit_price="150.00",
+        ),
     )
     with app.app_context():
         db.session.add(Inventory(product_id=1, quantity_on_hand=4))
@@ -501,7 +523,9 @@ def test_sales_workflow_ui_empty_state_validation_and_success(logged_in_client, 
     assert sale_form.status_code == 200
     assert b"form-select" in sale_form.data
     assert b"form-control" in sale_form.data
-    assert b"Noise-Cancelling Headphones (ANC-200): 150.00, 4 in stock" in sale_form.data
+    assert (
+        b"Noise-Cancelling Headphones (ANC-200): 150.00, 4 in stock" in sale_form.data
+    )
 
     # 3. Validation error on insufficient stock
     bad_sale = client.post(
@@ -538,18 +562,24 @@ def test_reports_workflow_empty_states_navigation_and_feedback(logged_in_client,
     assert inv_report_empty.status_code == 200
     assert b"No active products found." in inv_report_empty.data
     assert b"alert alert-info" in inv_report_empty.data
-    assert b'/reports/sales' in inv_report_empty.data
+    assert b"/reports/sales" in inv_report_empty.data
 
     sales_report_empty = client.get("/reports/sales")
     assert sales_report_empty.status_code == 200
     assert b"No sales found for this period." in sales_report_empty.data
     assert b"alert alert-info" in sales_report_empty.data
-    assert b'/reports/inventory' in sales_report_empty.data
+    assert b"/reports/inventory" in sales_report_empty.data
 
     # 2. Populate product, inventory, and sale, then verify report figures
     client.post(
         "/products/new",
-        data=_form(category_id, name="SSD 1TB", sku="SSD-1TB", unit_price="80.00", reorder_level="3"),
+        data=_form(
+            category_id,
+            name="SSD 1TB",
+            sku="SSD-1TB",
+            unit_price="80.00",
+            reorder_level="3",
+        ),
     )
     with app.app_context():
         db.session.add(Inventory(product_id=1, quantity_on_hand=5))
@@ -578,7 +608,9 @@ def test_reports_workflow_empty_states_navigation_and_feedback(logged_in_client,
     assert b'value="2026-10-10"' in bad_dates.data
 
 
-def test_form_value_preservation_across_modules_on_validation_error(logged_in_client, app):
+def test_form_value_preservation_across_modules_on_validation_error(
+    logged_in_client, app
+):
     """Step 5F: Submit invalid forms across Products, Suppliers, Purchases, and Sales,
     and verify both the validation error alert and preserved user inputs."""
     from app.extensions import db
@@ -612,7 +644,9 @@ def test_form_value_preservation_across_modules_on_validation_error(logged_in_cl
     # Create a valid product with stock for purchase and sale form tests
     client.post(
         "/products/new",
-        data=_form(category_id, name="4K Gaming Monitor", sku="MON-4K-01", unit_price="300.00"),
+        data=_form(
+            category_id, name="4K Gaming Monitor", sku="MON-4K-01", unit_price="300.00"
+        ),
     )
     with app.app_context():
         db.session.add(Inventory(product_id=1, quantity_on_hand=3))
@@ -657,8 +691,14 @@ def test_form_value_preservation_across_modules_on_validation_error(logged_in_cl
         r'<option value="1"\s+selected>',
         bad_purchase.data.decode("utf-8"),
     )
-    assert b'name="quantity" class="form-control" min="1" step="1" required value="6"' in bad_purchase.data
-    assert b'name="unit_cost" class="form-control" min="0" step="0.01" required value="-15.00"' in bad_purchase.data
+    assert (
+        b'name="quantity" class="form-control" min="1" step="1" required value="6"'
+        in bad_purchase.data
+    )
+    assert (
+        b'name="unit_cost" class="form-control" min="0" step="0.01" required value="-15.00"'
+        in bad_purchase.data
+    )
 
     # 4. Sales form preserves selected product and quantity when stock is insufficient
     bad_sale = client.post(

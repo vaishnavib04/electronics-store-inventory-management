@@ -1,8 +1,9 @@
-from flask_login import UserMixin
 from datetime import datetime
 from decimal import Decimal
 
-from sqlalchemy import CheckConstraint, UniqueConstraint
+from flask_login import UserMixin
+from sqlalchemy import CheckConstraint
+
 from app.extensions import db
 
 
@@ -50,9 +51,7 @@ class Product(db.Model):
     is_active = db.Column(db.Boolean, nullable=False, default=True)
 
     category = db.relationship("Category", back_populates="products")
-    inventory = db.relationship(
-        "Inventory", back_populates="product", uselist=False
-    )
+    inventory = db.relationship("Inventory", back_populates="product", uselist=False)
     purchase_items = db.relationship("PurchaseItem", back_populates="product")
     sale_items = db.relationship("SaleItem", back_populates="product")
     stock_movements = db.relationship("StockMovement", back_populates="product")
@@ -68,13 +67,11 @@ class Inventory(db.Model):
 
     inventory_id = db.Column(db.Integer, primary_key=True)
     product_id = db.Column(
-        db.Integer, db.ForeignKey("products.product_id"),
-        unique=True, nullable=False
+        db.Integer, db.ForeignKey("products.product_id"), unique=True, nullable=False
     )
     quantity_on_hand = db.Column(db.Integer, nullable=False, default=0)
     last_updated = db.Column(
-        db.DateTime, nullable=False, default=datetime.utcnow,
-        onupdate=datetime.utcnow
+        db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow
     )
 
     product = db.relationship("Product", back_populates="inventory")
@@ -90,11 +87,7 @@ class Supplier(db.Model):
     email = db.Column(db.String(150))
     address = db.Column(db.Text)
 
-    is_active = db.Column(
-        db.Boolean,
-        nullable=False,
-        default=True
-    )
+    is_active = db.Column(db.Boolean, nullable=False, default=True)
 
     purchases = db.relationship("Purchase", back_populates="supplier")
 
@@ -109,9 +102,7 @@ class Purchase(db.Model):
     supplier_id = db.Column(
         db.Integer, db.ForeignKey("suppliers.supplier_id"), nullable=False
     )
-    user_id = db.Column(
-        db.Integer, db.ForeignKey("users.user_id"), nullable=False
-    )
+    user_id = db.Column(db.Integer, db.ForeignKey("users.user_id"), nullable=False)
     purchase_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     total_cost = db.Column(db.Numeric(12, 2), nullable=False, default=Decimal("0.00"))
 
@@ -148,13 +139,9 @@ class Sale(db.Model):
     )
 
     sale_id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(
-        db.Integer, db.ForeignKey("users.user_id"), nullable=False
-    )
+    user_id = db.Column(db.Integer, db.ForeignKey("users.user_id"), nullable=False)
     sale_datetime = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    total_amount = db.Column(
-        db.Numeric(12, 2), nullable=False, default=Decimal("0.00")
-    )
+    total_amount = db.Column(db.Numeric(12, 2), nullable=False, default=Decimal("0.00"))
     status = db.Column(db.String(30), nullable=False, default="COMPLETED")
 
     user = db.relationship("User", back_populates="sales")
@@ -169,9 +156,7 @@ class SaleItem(db.Model):
     )
 
     sale_item_id = db.Column(db.Integer, primary_key=True)
-    sale_id = db.Column(
-        db.Integer, db.ForeignKey("sales.sale_id"), nullable=False
-    )
+    sale_id = db.Column(db.Integer, db.ForeignKey("sales.sale_id"), nullable=False)
     product_id = db.Column(
         db.Integer, db.ForeignKey("products.product_id"), nullable=False
     )
@@ -198,9 +183,7 @@ class StockMovement(db.Model):
     movement_type = db.Column(db.String(3), nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
     reference_id = db.Column(db.Integer)
-    user_id = db.Column(
-        db.Integer, db.ForeignKey("users.user_id"), nullable=False
-    )
+    user_id = db.Column(db.Integer, db.ForeignKey("users.user_id"), nullable=False)
     timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     product = db.relationship("Product", back_populates="stock_movements")

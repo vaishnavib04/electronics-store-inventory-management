@@ -1,4 +1,3 @@
-
 import os
 
 import pytest
@@ -21,7 +20,9 @@ def _create_test_category(connection):
     ).scalar_one()
 
 
-def _insert_test_product(connection, category_id, *, sku, unit_price=1, reorder_level=0):
+def _insert_test_product(
+    connection, category_id, *, sku, unit_price=1, reorder_level=0
+):
     connection.execute(
         text(
             """

@@ -1,4 +1,5 @@
 import time
+
 import pytest
 
 
@@ -8,10 +9,11 @@ def performance_data(monkeypatch):
     monkeypatch.setenv("SECRET_KEY", "nfr-test-secret-key")
     monkeypatch.setenv("DATABASE_URL", "sqlite:///:memory:")
 
+    from werkzeug.security import generate_password_hash
+
     from app import create_app
     from app.extensions import db
-    from app.models import User, Category, Product, Inventory
-    from werkzeug.security import generate_password_hash
+    from app.models import Category, Inventory, Product, User
 
     app = create_app()
     app.config.update(TESTING=True, WTF_CSRF_ENABLED=False)
@@ -43,13 +45,15 @@ def performance_data(monkeypatch):
         db.session.add_all(products)
         db.session.flush()
 
-        db.session.add_all([
-            Inventory(
-                product_id=product.product_id,
-                quantity_on_hand=2 if i < 10 else 50,
-            )
-            for i, product in enumerate(products)
-        ])
+        db.session.add_all(
+            [
+                Inventory(
+                    product_id=product.product_id,
+                    quantity_on_hand=2 if i < 10 else 50,
+                )
+                for i, product in enumerate(products)
+            ]
+        )
         db.session.commit()
 
         client = app.test_client()

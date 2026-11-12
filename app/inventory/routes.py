@@ -20,12 +20,13 @@ Models: matches Member 1's DB-001 PR (#14) exactly. Verified, no changes needed.
 Login: uses Flask-Login's login_required, as in Member 1's auth PR (#16).
 Note: this blueprint has NO url_prefix, because the routes already start with /inventory.
 """
+
 from flask import Blueprint, render_template, request
+from flask_login import login_required  # Member 1's auth (PR #16) uses Flask-Login
 from sqlalchemy import or_, select, update
 
 from app.extensions import db
-from app.models import Product, Inventory
-from flask_login import login_required  # Member 1's auth (PR #16) uses Flask-Login
+from app.models import Inventory, Product
 
 inventory_bp = Blueprint("inventory", __name__)
 
@@ -145,7 +146,9 @@ def _inventory_query():
 
 def _to_row(product, inventory):
     qty = inventory.quantity_on_hand if inventory else 0
-    category = getattr(product, "category", None)  # works if M1 defined the relationship
+    category = getattr(
+        product, "category", None
+    )  # works if M1 defined the relationship
     return {
         "product_id": product.product_id,
         "sku": product.sku,
@@ -168,7 +171,9 @@ def get_inventory_rows(search="", low_only=False):
     query = _inventory_query()
     if search:
         pattern = f"%{search}%"
-        query = query.filter(or_(Product.name.ilike(pattern), Product.sku.ilike(pattern)))
+        query = query.filter(
+            or_(Product.name.ilike(pattern), Product.sku.ilike(pattern))
+        )
     if low_only:
         query = query.filter(_stock_qty() <= Product.reorder_level).order_by(
             _stock_qty(), Product.name

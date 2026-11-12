@@ -70,9 +70,7 @@ def _read_purchase_form():
     if not raw_product_ids:
         return None, "Add at least one product to the purchase."
 
-    if not (
-        len(raw_product_ids) == len(raw_quantities) == len(raw_unit_costs)
-    ):
+    if not (len(raw_product_ids) == len(raw_quantities) == len(raw_unit_costs)):
         return None, "Each product must have a quantity and unit cost."
 
     items = []
